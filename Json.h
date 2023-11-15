@@ -25,6 +25,11 @@ class JsonPrimitive {
 		JsonPrimitive(JsonObject);
 		JsonPrimitive(JsonArray);
 	public:
+		/**
+		 * return the stored string stored in this object
+		 * Will throw error if there is the 'str' pointer is null
+		 */
+		std::string getAsString();
 		// return the stored JsonObject or convert the stored string to JsonObject
 		JsonObject getAsJsonObject();
 		// return the stored JsonArray or convert the sotred string to JsonArray
@@ -47,4 +52,14 @@ class JsonObject{
 		void put(std::string, JsonObject);
 };
 
-class JsonArray{};
+class JsonArray{
+	private:
+		std::vector<JsonPrimitive*> vec;
+	public:
+		JsonArray(std::string);
+		JsonPrimitive get(std::string);
+		void put(std::string);
+		void put(JsonArray);
+		void put(JsonObject);
+		void remove(int);
+};
