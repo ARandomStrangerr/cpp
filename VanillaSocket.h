@@ -1,8 +1,9 @@
-#include "iostream"
-#include "sys/socket.h"
-#include "netinet/in.h"
-#include "cstring"
-#include "unistd.h"
+#include <iostream>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <string.h>
+#include <arpa/inet.h>
 
 class Listener;
 class Socket;
@@ -16,18 +17,20 @@ class Listener{
 		// 	int: the port number
 		//	int: the queue lenght
 		Listener(int, int);
-		// accept a socket in the connection request queue
-		Socket accept();
+		/**
+		 * accept a socket in the connection request queue
+		 */
+		Socket acceptConnection();
 		// close the listener
 		void disconnect();
 };
 
 class Socket{
 	private:
-		int socket;
+		int socketDescriptor;
 	public:
 		/** 
-		 * for already created socket ie. accepted by a socket
+		 * for already created socket ie. accepted by a listener
 		 */
 		Socket(int);
 		/**
@@ -42,11 +45,11 @@ class Socket{
 		 * return
 		 * std::string a string read from stream
 		 */
-		std::string read();
+		std::string readLine();
 		/**
 		 * write string to socket
 		 * arguments
 		 * the content of the data
 		 */
-		void write(std::string*);
+		void write(const char*, int);
 };
