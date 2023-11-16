@@ -26,12 +26,27 @@ class Socket{
 	private:
 		int socket;
 	public:
-		// for already created socket ie. accepted by a socket
+		/** 
+		 * for already created socket ie. accepted by a socket
+		 */
 		Socket(int);
-		// create a new socket connecting to a specific place
+		/**
+		 * create a new socket connecting to a specific place.
+		 * arguments
+		 * string	IP adress
+		 * int		port number
+		 */
 		Socket(std::string, int);
-		// read string from the socket
+		/**
+		 * read string from the socket
+		 * return
+		 * std::string a string read from stream
+		 */
 		std::string read();
-		// write a string to the socket
+		/**
+		 * write string to socket
+		 * arguments
+		 * the content of the data
+		 */
 		void write(std::string*);
 };
