@@ -52,4 +52,6 @@ class Socket{
 		 * the content of the data
 		 */
 		void write(const char*, int);
+
+		void disconnect();
 };

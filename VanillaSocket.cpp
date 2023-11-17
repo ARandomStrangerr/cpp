@@ -101,3 +101,7 @@ std::string Socket::readLine(){
 	}
 	return bufferString;
 }
+
+void Socket::disconnect(){
+	::close(socketDescriptor);
+}
