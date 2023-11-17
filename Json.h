@@ -21,45 +21,76 @@ class JsonPrimitive {
 		std::string* str;
 		JsonObject* jsonObj;
 		JsonArray* jsonArr;
-		JsonPrimitive(std::string);
-		JsonPrimitive(JsonObject);
-		JsonPrimitive(JsonArray);
+		JsonPrimitive(std::string); // store the arg as string
+		JsonPrimitive(JsonObject); // store the arg as JsonObject
+		JsonPrimitive(JsonArray); // store the arg as JsonArray
 	public:
 		/**
 		 * return the stored string stored in this object
 		 * Will throw error if there is the 'str' pointer is null
 		 */
 		std::string getAsString();
-		// return the stored JsonObject or convert the stored string to JsonObject
+		// return the stored JsonObject or attempt to convert the stored string to JsonObject
 		JsonObject getAsJsonObject();
-		// return the stored JsonArray or convert the sotred string to JsonArray
+		// return the stored JsonArray or attempt to convert the sotred string to JsonArray
 		JsonArray getAsJsonArray();
 };
 
 class JsonObject{
+	friend class JsonPrimitive;
 	private:
-		std::map<std::string, JsonPrimitive*> m;
-	public:
-		// parse a given string into JsonObject
+		std::map<std::string, JsonPrimitive*> m; // the map that hold key - value pair
+		// parse a given string into JsonObject without validation
+		// this can only be called by JsonPrimitive
 		JsonObject(std::string);
-		// get a JsonPrimitive based on the given key
-		JsonPrimitive get(std::string);
-		// put a string
-		void put(std::string, std::string);
-		// put a JsonArray
-		void put(std::string, JsonArray);
-		// put a JsonObject
-		void put(std::string, JsonObject);
+	public:
+		JsonPrimitive get(std::string);	// get a JsonPrimitive based on the given key
+		void put(std::string, std::string); // put a string	
+		void put(std::string, JsonArray); // put a JsonArray
+		void put(std::string, JsonObject); // put a JsonObject
+		static JsonObject parse(std::string); // parse a string to JsonObject with validation. return an instance of this class
 };
 
 class JsonArray{
 	private:
 		std::vector<JsonPrimitive*> vec;
-	public:
+		/**
+		 * this will presume that the given string is in the correct form and parse it without verification
+		 */
 		JsonArray(std::string);
-		JsonPrimitive get(std::string);
+	public:
+		/**
+		 * retreat a Json Primitive based on the index
+		 * input:
+		 * 	int - index number
+		 * output:
+		 * 	JsonPrimitive - the value associated with the index
+		 * error:
+		 * 	throw an error when the index is out of range
+		 */
+		JsonPrimitive get(int);
+		// store a string
 		void put(std::string);
+		// store a JsonArray
 		void put(JsonArray);
+		// store a JsonObject 
 		void put(JsonObject);
+		/**
+		 * remove and return a Json Primitive based on the index
+		 * input:
+		 * 	int - index number
+		 * output:
+		 *	JsonPrimitive - the removed object associated with the index
+		 * error:
+		 * 	when the index if out of range
+		 */
 		void remove(int);
+		/**
+		 * pase a srting to JsonArray with validation.
+		 * input
+		 * 	std::string a string to prase to JsonArray
+		 * return
+		 * 	an instane of this class
+		 */
+		static JsonArray parse(std::string);
 };
