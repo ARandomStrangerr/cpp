@@ -1,12 +1,16 @@
-#include <string>
 #include "Json.h"
 
 JsonPrimitive::JsonPrimitive(std::string str){
-	this -> str = &str;
+	this -> str = new std::string(str);
 }
 
 JsonPrimitive::JsonPrimitive(JsonObject obj){
 	this -> jsonObj = &obj;
+}
+
+std::string JsonPrimitive::getAsString(){
+	if (str) return *str;
+	throw std::runtime_error("this string is alaready converted into different data type");
 }
 
 JsonPrimitive::JsonPrimitive(JsonArray arr){
@@ -14,12 +18,12 @@ JsonPrimitive::JsonPrimitive(JsonArray arr){
 }
 
 JsonObject JsonPrimitive::getAsJsonObject(){
-	if (jsonObj) return *(this->jsonObj);
-	else if (str) {
+	if (jsonObj) return *(this->jsonObj); // if the json is already there, return it
+	else if (str) { // attemp to convert string into json
 		JsonObject *obj = new JsonObject(*(this->str));
 		this->jsonObj = obj;
 		return *(this->jsonObj);
-	} else throw std::runtime_error("");
+	} else throw std::runtime_error(""); // error because it is json array
 }
 
 int getEndKeyIndex(std::string str, int index) {
@@ -91,78 +95,28 @@ JsonObject::JsonObject(std::string str){
 		std::string	value = str.substr(endKeyIndex, endValueIndex - endKeyIndex);
 		strip(value);
 		index = endValueIndex;
-		m[key] = new JsonPrimitive(value);
+		JsonPrimitive* jsonPrimitive = new JsonPrimitive(value);
+		m[key] = jsonPrimitive;
 	}
 }
 
-void verification(std::string str){
-	std::string key,value,temp;
-	bool quote = 0,
-		 colon = 0;
-	int curlyBrace = 0,
-		squareBrace = 0;
-	for (int index = 0; index < str.size(); index++){
-		char currentChar = str[index];
-		switch (currentChar){ // examining the current character
-			/*
-			 * can be open or close quote
-			 * signify the end of a string
-			 * this string can be key or value of type string
-			 */
-			case '"':
-				if (quote) // case when this quote is close
-					quote = 0;
-				else { // case when this quote is open
-					quote = 1;
-					/*
-					 * this error occurs when the temp string is not empty
-					 * since after a reset character : , [ ] { } temp will be reset.
-					 * the existence of temp proof that those reset characters have not appeared
-					 * hence, Json is incorrect format
-					 */
-					if (!temp.empty()) throw std::invalid_argument("incorrect character at " + std::to_string(index));
-				}
-				break;
-			// key stroke to separate between key-value pair
-			case ':':
-				if (!quote) { // check that this colon is not inside a string
-					if (colon) throw std::runtime_error("incorrect character at " + std::to_string(index)); // this error occurs when there is a colon appear in the key - value pair already.
-					colon = 1; // register that close has been seen for this key - value pair
-					key = temp.c_str(); // copy the temp string into the key
-					temp = ""; // reset the temp variable
-				}
-				break;
-			// separate between current key-value pair and the next key-value pair
-			case ',':
-				if (!quote) { // check if this comma is outside a string
-					colon = 0;
-					value = temp.c_str();
-					temp = "";
-					std::cout<<key<<"|"<<value<<std::endl;
-				}
-				break;
-			case '{':
-				if (!quote) curlyBrace++;
-				break;
-			case '}':
-				if (!quote){
-					curlyBrace--;
-					colon = 0;
-					value = temp.c_str();
-					temp = "";
-					std::cout<<key<<"|"<<value<<std::endl;
-				}
-				break;
-			case '[':
-				if (!quote) squareBrace++;
-				break;
-			case ']':
-				if (!quote) squareBrace--;
-			// default character
-			default:
-				if (quote) temp += currentChar; // append the current character into string if inside quote
-				else throw std::runtime_error("incorrect character at " + std::to_string(index));
-				break;
-		}
+JsonPrimitive JsonObject::get(std::string key){
+	if (m[key]) return *m[key];
+	throw std::invalid_argument("the given key does not associated with any value");
+}
+
+JsonObject JsonObject::parse(std::string str){
+	JsonObject returnObj (str);
+	return returnObj;
+}
+
+JsonArray::JsonArray(std::string str){
+	for (int index = 0; index < str.length(); index++){
+		int endValueIndex = getEndKeyIndex(str, index);
+		std::string value = str.substr(index, endValueIndex - index);
+		strip(value);
+		index = endValueIndex;
+		JsonPrimitive* jsonPrimitive = new JsonPrimitive(value);
+		vec.push_back(jsonPrimitive);
 	}
 }

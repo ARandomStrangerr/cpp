@@ -40,10 +40,23 @@ class JsonObject{
 	friend class JsonPrimitive;
 	private:
 		std::map<std::string, JsonPrimitive*> m; // the map that hold key - value pair
-		// parse a given string into JsonObject without validation
-		// this can only be called by JsonPrimitive
+		/**
+		 * parse a given string into JsonObject without validation.
+		 * this can only be called by JsonPrimitive, or itself
+		 * intput
+		 * 	std::string the string to parse JsonObject
+		 */
 		JsonObject(std::string);
 	public:
+		/**
+		 * get a JsonPrimitive based on the given string
+		 * input
+		 * 	std::string - name of the key
+		 * output
+		 * 	JsonPrimitive - the primitive data
+		 * error
+		 * 	when not value associated with the key
+		 */
 		JsonPrimitive get(std::string);	// get a JsonPrimitive based on the given key
 		void put(std::string, std::string); // put a string	
 		void put(std::string, JsonArray); // put a JsonArray
@@ -55,7 +68,10 @@ class JsonArray{
 	private:
 		std::vector<JsonPrimitive*> vec;
 		/**
+		 * prase the given string into a json array
 		 * this will presume that the given string is in the correct form and parse it without verification
+		 * input
+		 * 	std::string - the string to parse to json array
 		 */
 		JsonArray(std::string);
 	public:
@@ -73,7 +89,7 @@ class JsonArray{
 		void put(std::string);
 		// store a JsonArray
 		void put(JsonArray);
-		// store a JsonObject 
+		// store a JsonObject
 		void put(JsonObject);
 		/**
 		 * remove and return a Json Primitive based on the index
@@ -91,6 +107,8 @@ class JsonArray{
 		 * 	std::string a string to prase to JsonArray
 		 * return
 		 * 	an instane of this class
+		 * error
+		 * 	when the string is invalid
 		 */
 		static JsonArray parse(std::string);
 };
