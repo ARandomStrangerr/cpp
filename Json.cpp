@@ -22,23 +22,20 @@ JsonObject JsonPrimitive::getAsJsonObject(){
 	else if (str) { // attemp to convert string into json
 		this -> jsonObj = new JsonObject(*(this->str));
 		this->str = nullptr;
-		std::cout<<"in getAsJsonObject "<<this<<"|"<<str<<std::endl;
 		return *(this->jsonObj);
 	} else throw std::runtime_error("This is JsonArray");
 }
 
 JsonArray JsonPrimitive::getAsJsonArray(){
-	std::cout<<"in getAsJsonArray "<<this<<"|"<<str<<std::endl;
-//	throw std::runtime_error("WTF!?");
-//	if (jsonArr) return *(this->jsonArr);
-//	else if (str) {
-//		std::cout<<str<<"|"<<jsonObj<<std::endl;
-//		JsonArray *arr = new JsonArray(*(this->str));
-//		this->jsonArr = arr;
-//		this->str = nullptr;
-//		std::cout<<str<<std::endl;
-//		return *(this->jsonArr);
-//	} else throw std::runtime_error("This is JsonObject");
+	if (jsonArr) return *(this->jsonArr);
+	else if (str) {
+		std::cout<<str<<"|"<<jsonObj<<std::endl;
+		JsonArray *arr = new JsonArray(*(this->str));
+		this->jsonArr = arr;
+		this->str = nullptr;
+		std::cout<<str<<std::endl;
+		return *(this->jsonArr);
+	} else throw std::runtime_error("This is JsonObject");
 	JsonArray returnObj;
 	return returnObj;
 }
