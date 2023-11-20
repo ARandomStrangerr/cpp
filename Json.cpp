@@ -20,10 +20,27 @@ JsonPrimitive::JsonPrimitive(JsonArray arr){
 JsonObject JsonPrimitive::getAsJsonObject(){
 	if (jsonObj) return *(this->jsonObj); // if the json is already there, return it
 	else if (str) { // attemp to convert string into json
-		JsonObject *obj = new JsonObject(*(this->str));
-		this->jsonObj = obj;
+		this -> jsonObj = new JsonObject(*(this->str));
+		this->str = nullptr;
+		std::cout<<"in getAsJsonObject "<<this<<"|"<<str<<std::endl;
 		return *(this->jsonObj);
-	} else throw std::runtime_error(""); // error because it is json array
+	} else throw std::runtime_error("This is JsonArray");
+}
+
+JsonArray JsonPrimitive::getAsJsonArray(){
+	std::cout<<"in getAsJsonArray "<<this<<"|"<<str<<std::endl;
+//	throw std::runtime_error("WTF!?");
+//	if (jsonArr) return *(this->jsonArr);
+//	else if (str) {
+//		std::cout<<str<<"|"<<jsonObj<<std::endl;
+//		JsonArray *arr = new JsonArray(*(this->str));
+//		this->jsonArr = arr;
+//		this->str = nullptr;
+//		std::cout<<str<<std::endl;
+//		return *(this->jsonArr);
+//	} else throw std::runtime_error("This is JsonObject");
+	JsonArray returnObj;
+	return returnObj;
 }
 
 int getEndKeyIndex(std::string str, int index) {
@@ -100,15 +117,16 @@ JsonObject::JsonObject(std::string str){
 	}
 }
 
-JsonPrimitive JsonObject::get(std::string key){
-	if (m[key]) return *m[key];
+JsonPrimitive* JsonObject::get(std::string key){
+	if (m[key]) return m[key];
 	throw std::invalid_argument("the given key does not associated with any value");
 }
 
-JsonObject JsonObject::parse(std::string str){
-	JsonObject returnObj (str);
-	return returnObj;
+JsonObject* JsonObject::parse(std::string str){
+	return new JsonObject(str);
 }
+
+JsonArray::JsonArray(){}
 
 JsonArray::JsonArray(std::string str){
 	for (int index = 0; index < str.length(); index++){
@@ -119,4 +137,8 @@ JsonArray::JsonArray(std::string str){
 		JsonPrimitive* jsonPrimitive = new JsonPrimitive(value);
 		vec.push_back(jsonPrimitive);
 	}
+}
+
+JsonArray* JsonArray::parse(std::string str){
+	return new JsonArray (str);
 }

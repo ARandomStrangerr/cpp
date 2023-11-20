@@ -18,13 +18,13 @@ class JsonPrimitive {
 		 * once the string converted either to JsonObject or JsonArray, ther will be no reverse
 		 * the default is to record the data as string then convert when methods are called.
 		 */
-		std::string* str;
 		JsonObject* jsonObj;
 		JsonArray* jsonArr;
 		JsonPrimitive(std::string); // store the arg as string
 		JsonPrimitive(JsonObject); // store the arg as JsonObject
 		JsonPrimitive(JsonArray); // store the arg as JsonArray
 	public:
+		std::string* str;
 		/**
 		 * return the stored string stored in this object
 		 * Will throw error if there is the 'str' pointer is null
@@ -48,6 +48,7 @@ class JsonObject{
 		 */
 		JsonObject(std::string);
 	public:
+		JsonObject();
 		/**
 		 * get a JsonPrimitive based on the given string
 		 * input
@@ -57,14 +58,15 @@ class JsonObject{
 		 * error
 		 * 	when not value associated with the key
 		 */
-		JsonPrimitive get(std::string);	// get a JsonPrimitive based on the given key
+		JsonPrimitive* get(std::string);	// get a JsonPrimitive based on the given key
 		void put(std::string, std::string); // put a string	
 		void put(std::string, JsonArray); // put a JsonArray
 		void put(std::string, JsonObject); // put a JsonObject
-		static JsonObject parse(std::string); // parse a string to JsonObject with validation. return an instance of this class
+		static JsonObject* parse(std::string); // parse a string to JsonObject with validation. return an instance of this class
 };
 
 class JsonArray{
+	friend class JsonPrimitive;
 	private:
 		std::vector<JsonPrimitive*> vec;
 		/**
@@ -75,6 +77,7 @@ class JsonArray{
 		 */
 		JsonArray(std::string);
 	public:
+		JsonArray();
 		/**
 		 * retreat a Json Primitive based on the index
 		 * input:
@@ -110,5 +113,5 @@ class JsonArray{
 		 * error
 		 * 	when the string is invalid
 		 */
-		static JsonArray parse(std::string);
+		static JsonArray* parse(std::string);
 };
