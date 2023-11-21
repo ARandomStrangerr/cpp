@@ -18,26 +18,23 @@ JsonPrimitive::JsonPrimitive(JsonArray arr){
 }
 
 JsonObject JsonPrimitive::getAsJsonObject(){
-	if (jsonObj) return *(this->jsonObj); // if the json is already there, return it
-	else if (str) { // attemp to convert string into json
+	if (jsonObj) return *(this->jsonObj); // if the json object is already there, return it
+	else if (str) { // attemp to convert string into json object
 		this -> jsonObj = new JsonObject(*(this->str));
 		this->str = nullptr;
 		return *(this->jsonObj);
-	} else throw std::runtime_error("This is JsonArray");
+	} else throw std::runtime_error("This object is not JsonObject"); // this object is json array, cannot be converted json object
 }
 
 JsonArray JsonPrimitive::getAsJsonArray(){
-	if (jsonArr) return *(this->jsonArr);
-	else if (str) {
-		std::cout<<str<<"|"<<jsonObj<<std::endl;
+	if (jsonArr) return *(this->jsonArr); // if the json array is already there, return it
+	else if (str) { // attemp to convert string into json array
 		JsonArray *arr = new JsonArray(*(this->str));
 		this->jsonArr = arr;
 		this->str = nullptr;
 		std::cout<<str<<std::endl;
 		return *(this->jsonArr);
-	} else throw std::runtime_error("This is JsonObject");
-	JsonArray returnObj;
-	return returnObj;
+	} else throw std::runtime_error("This object is not JsonArray"); // this object is json object, cannot be converted to json array
 }
 
 int getEndKeyIndex(std::string str, int index) {
@@ -101,7 +98,7 @@ void strip(std::string &str){
 }
 
 JsonObject::JsonObject(std::string str){
-	for (int index = 1; index < str.size(); index++){
+	for (int index = 1; index < str.size()-1; index++){
 		int endKeyIndex = getEndKeyIndex(str, index);
 		std::string key = str.substr(index, endKeyIndex - index);
 		strip(key);
@@ -116,7 +113,7 @@ JsonObject::JsonObject(std::string str){
 
 JsonPrimitive* JsonObject::get(std::string key){
 	if (m[key]) return m[key];
-	throw std::invalid_argument("the given key does not associated with any value");
+	throw std::invalid_argument(key + " does not associated with any value");
 }
 
 JsonObject* JsonObject::parse(std::string str){
