@@ -8,8 +8,8 @@ JsonPrimitive::JsonPrimitive(JsonObject obj){
 	this -> jsonObj = &obj;
 }
 
-std::string JsonPrimitive::getAsString(){
-	if (str) return *str;
+std::string* JsonPrimitive::getAsString(){
+	if (str) return str;
 	throw std::runtime_error("this string is alaready converted into different data type");
 }
 
@@ -17,23 +17,22 @@ JsonPrimitive::JsonPrimitive(JsonArray arr){
 	this -> jsonArr = &arr;
 }
 
-JsonObject JsonPrimitive::getAsJsonObject(){
-	if (jsonObj) return *(this->jsonObj); // if the json object is already there, return it
+JsonObject* JsonPrimitive::getAsJsonObject(){
+	if (jsonObj) return this->jsonObj; // if the json object is already there, return it
 	else if (str) { // attemp to convert string into json object
 		this -> jsonObj = new JsonObject(*(this->str));
 		this->str = nullptr;
-		return *(this->jsonObj);
+		return this->jsonObj;
 	} else throw std::runtime_error("This object is not JsonObject"); // this object is json array, cannot be converted json object
 }
 
-JsonArray JsonPrimitive::getAsJsonArray(){
-	if (jsonArr) return *(this->jsonArr); // if the json array is already there, return it
+JsonArray* JsonPrimitive::getAsJsonArray(){
+	if (jsonArr) return this->jsonArr; // if the json array is already there, return it
 	else if (str) { // attemp to convert string into json array
 		JsonArray *arr = new JsonArray(*(this->str));
 		this->jsonArr = arr;
 		this->str = nullptr;
-		std::cout<<str<<std::endl;
-		return *(this->jsonArr);
+		return this->jsonArr;
 	} else throw std::runtime_error("This object is not JsonArray"); // this object is json object, cannot be converted to json array
 }
 
@@ -79,8 +78,10 @@ int getEndValueIndex(std::string str, int index){
 				break;
 			case ']':
 				if (!quote) squareBrace--;
+				break;
 			case ',':
 				if (squareBrace == 0 && curlyBrace == 0) return i;
+				break;
 		}
 	}
 	return str.size()-1;
@@ -104,6 +105,7 @@ JsonObject::JsonObject(std::string str){
 		strip(key);
 		int	endValueIndex = getEndValueIndex(str, endKeyIndex);
 		std::string	value = str.substr(endKeyIndex, endValueIndex - endKeyIndex);
+		std::cout<<endKeyIndex<<"|"<<endValueIndex<<std::endl;
 		strip(value);
 		index = endValueIndex;
 		JsonPrimitive* jsonPrimitive = new JsonPrimitive(value);
@@ -124,7 +126,7 @@ JsonArray::JsonArray(){}
 
 JsonArray::JsonArray(std::string str){
 	for (int index = 0; index < str.length(); index++){
-		int endValueIndex = getEndKeyIndex(str, index);
+		int endValueIndex = getEndValueIndex(str, index);
 		std::string value = str.substr(index, endValueIndex - index);
 		strip(value);
 		index = endValueIndex;
@@ -135,4 +137,9 @@ JsonArray::JsonArray(std::string str){
 
 JsonArray* JsonArray::parse(std::string str){
 	return new JsonArray (str);
+}
+
+JsonPrimitive* JsonArray::get(int index){
+	if (index < 0 || index >= vec.size()) throw std::invalid_argument("index out of bound");
+	return vec[index];
 }

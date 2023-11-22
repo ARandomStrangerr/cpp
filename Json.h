@@ -29,11 +29,11 @@ class JsonPrimitive {
 		 * return the stored string stored in this object
 		 * Will throw error if there is the 'str' pointer is null
 		 */
-		std::string getAsString();
+		std::string* getAsString();
 		// return the stored JsonObject or attempt to convert the stored string to JsonObject
-		JsonObject getAsJsonObject();
+		JsonObject* getAsJsonObject();
 		// return the stored JsonArray or attempt to convert the sotred string to JsonArray
-		JsonArray getAsJsonArray();
+		JsonArray* getAsJsonArray();
 };
 
 class JsonObject{
@@ -85,9 +85,9 @@ class JsonArray{
 		 * output:
 		 * 	JsonPrimitive - the value associated with the index
 		 * error:
-		 * 	throw an error when the index is out of range
+		 * 	throw std::invalid_argument when the index is out of range
 		 */
-		JsonPrimitive get(int);
+		JsonPrimitive* get(int);
 		// store a string
 		void put(std::string);
 		// store a JsonArray
@@ -103,7 +103,7 @@ class JsonArray{
 		 * error:
 		 * 	when the index if out of range
 		 */
-		void remove(int);
+		JsonPrimitive* remove(int);
 		/**
 		 * pase a srting to JsonArray with validation.
 		 * input
