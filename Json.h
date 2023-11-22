@@ -30,7 +30,12 @@ class JsonPrimitive {
 		 * Will throw error if there is the 'str' pointer is null
 		 */
 		std::string* getAsString();
-		// return the stored JsonObject or attempt to convert the stored string to JsonObject
+		/**
+		 * return
+		 * 	std::string* pointer to a string that is holding by this pointer
+		 * error
+		 * 	std::runtime_error when the std::string* is null
+		 */
 		JsonObject* getAsJsonObject();
 		// return the stored JsonArray or attempt to convert the sotred string to JsonArray
 		JsonArray* getAsJsonArray();
