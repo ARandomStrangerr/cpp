@@ -92,13 +92,36 @@ class JsonObject{
 		 * output
 		 * 	JsonPrimitive - the primitive data
 		 * error
-		 * 	when not value associated with the key
+		 * 	std::runtime_error when no value associated with the key
 		 */
-		JsonPrimitive* get(std::string);	// get a JsonPrimitive based on the given key
-		void put(std::string, std::string); // put a string	
-		void put(std::string, JsonArray); // put a JsonArray
-		void put(std::string, JsonObject); // put a JsonObject
-		static JsonObject* parse(std::string); // parse a string to JsonObject with validation. return an instance of this class
+		JsonPrimitive* get(std::string);
+		/**
+		 * put a string into this JsonObject
+		 * input
+		 * 	std::string the key of the object
+		 * 	std::string* the pointer to the std::string associated with the key
+		 */
+		void put(std::string, std::string*);
+		/** 
+		 * put a JsonArray into this JsonObject
+		 * input
+		 * 	std::string the key of the object
+		 * 	JsonArray* the pointer to the JsonArray associated with the key
+		 */
+		void put(std::string, JsonArray*);
+		/**
+		 * put a JsonObject into this JsonObject
+		 * input
+		 * 	std::string the key of the object
+		 * 	JsonObject* the poitner to the JsonObject associated with the key
+		 */
+		void put(std::string, JsonObject*);
+		/**
+		 * parse a string into JsonObject with check
+		 * input
+		 * 	std::string* the pointer to the string to parse
+		 */
+		static JsonObject* parse(std::string*); // parse a string to JsonObject with validation. return an instance of this class
 };
 
 class JsonArray{
