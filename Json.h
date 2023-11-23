@@ -121,7 +121,7 @@ class JsonObject{
 		 * input
 		 * 	std::string* the pointer to the string to parse
 		 */
-		static JsonObject* parse(std::string*); // parse a string to JsonObject with validation. return an instance of this class
+		static JsonObject* parse(std::string*);
 };
 
 class JsonArray{
