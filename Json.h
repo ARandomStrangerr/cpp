@@ -31,13 +31,20 @@ class JsonPrimitive {
 		 */
 		std::string* getAsString();
 		/**
+		 * return exists JsonObject or attempt to convert the stored string into JsonObject
 		 * return
-		 * 	std::string* pointer to a string that is holding by this pointer
+		 * 	JsonObject* pointer to a JsonObject which is held by this JsonPrimitive
 		 * error
-		 * 	std::runtime_error when the std::string* is null
+		 * 	std::runtime_error when *str and *jsonObj are null
 		 */
 		JsonObject* getAsJsonObject();
-		// return the stored JsonArray or attempt to convert the sotred string to JsonArray
+		/**
+		 * return exists JsonArray or attempt to convert the stored string into JsonArray
+		 * return
+		 * 	JsonArray* pointer to a JsonArray which is held by this JsonPrimitive
+		 * error:
+		 * 	std::runtime_error when *str and *jsonArr are null
+		 */
 		JsonArray* getAsJsonArray();
 };
 
