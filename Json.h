@@ -20,14 +20,35 @@ class JsonPrimitive {
 		 */
 		JsonObject* jsonObj;
 		JsonArray* jsonArr;
-		JsonPrimitive(std::string); // store the arg as string
-		JsonPrimitive(JsonObject); // store the arg as JsonObject
-		JsonPrimitive(JsonArray); // store the arg as JsonArray
-	public:
 		std::string* str;
 		/**
+		 * this JsonPrimitive holds string
+		 * pass by pointer to avoid copy of large object
+		 * input
+		 * 	std::string* the pointer to the String to be stored
+		 */
+		JsonPrimitive(std::string*);
+		/**
+		 * this jsonPrimitive holds JsonObject
+		 * pass by pointer to avoid copy of large object
+		 * input
+		 * 	JsonObject* pointer to the JsonObject to be stored
+		 */
+		JsonPrimitive(JsonObject*);
+		/**
+		 * this JsonPrimitve holds JsonArray.
+		 * pass by pointer to avoid copy of large object
+		 * input
+		 * 	JsonArray* pointer to JsonArray to be stored
+		 */
+		JsonPrimitive(JsonArray*);
+	public:
+		/**
 		 * return the stored string stored in this object
-		 * Will throw error if there is the 'str' pointer is null
+		 * return
+		 * 	str::string* pointer to a string whic is held by this JsonPrimitive
+		 * error
+		 * 	std::runtime_error when *str is null
 		 */
 		std::string* getAsString();
 		/**
@@ -60,6 +81,9 @@ class JsonObject{
 		 */
 		JsonObject(std::string);
 	public:
+		/**
+		 * default constructor to create an empty JsonObject
+		 */
 		JsonObject();
 		/**
 		 * get a JsonPrimitive based on the given string
