@@ -9,6 +9,7 @@ class JsonObject;
 class JsonArray;
 
 class JsonPrimitive {
+	friend std::ostream& operator<< (std::ostream& os, const JsonPrimitive& obj);
 	friend class JsonObject;
 	friend class JsonArray;
 	private:
@@ -36,7 +37,7 @@ class JsonPrimitive {
 		 */
 		JsonPrimitive(JsonObject*);
 		/**
-		 * this JsonPrimitve holds JsonArray.
+		 * this JsonPrimitive holds JsonArray.
 		 * pass by pointer to avoid copy of large object
 		 * input
 		 * 	JsonArray* pointer to JsonArray to be stored
@@ -70,6 +71,7 @@ class JsonPrimitive {
 };
 
 class JsonObject{
+	friend std::ostream& operator<< (std::ostream& os, const JsonObject& obj);
 	friend class JsonPrimitive;
 	private:
 		std::map<std::string, JsonPrimitive*> m; // the map that hold key - value pair
@@ -79,7 +81,7 @@ class JsonObject{
 		 * intput
 		 * 	std::string the string to parse JsonObject
 		 */
-		JsonObject(std::string);
+		JsonObject(std::string*);
 	public:
 		/**
 		 * default constructor to create an empty JsonObject
@@ -125,6 +127,7 @@ class JsonObject{
 };
 
 class JsonArray{
+	friend std::ostream& operator<< (std::ostream& os, const JsonArray& obj);
 	friend class JsonPrimitive;
 	private:
 		std::vector<JsonPrimitive*> vec;
