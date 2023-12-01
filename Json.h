@@ -19,30 +19,9 @@ class JsonPrimitive {
 		 * once the string converted either to JsonObject or JsonArray, ther will be no reverse
 		 * the default is to record the data as string then convert when methods are called.
 		 */
-		JsonObject* jsonObj;
-		JsonArray* jsonArr;
-		std::string* str;
-		/**
-		 * this JsonPrimitive holds string
-		 * pass by pointer to avoid copy of large object
-		 * input
-		 * 	std::string* the pointer to the String to be stored
-		 */
-		JsonPrimitive(std::string*);
-		/**
-		 * this jsonPrimitive holds JsonObject
-		 * pass by pointer to avoid copy of large object
-		 * input
-		 * 	JsonObject* pointer to the JsonObject to be stored
-		 */
-		JsonPrimitive(JsonObject*);
-		/**
-		 * this JsonPrimitive holds JsonArray.
-		 * pass by pointer to avoid copy of large object
-		 * input
-		 * 	JsonArray* pointer to JsonArray to be stored
-		 */
-		JsonPrimitive(JsonArray*);
+		JsonObject* jsonObjPtr;
+		JsonArray* jsonArrPtr;
+		std::string* strPtr;
 	public:
 		/**
 		 * return the stored string stored in this object
@@ -74,7 +53,6 @@ class JsonObject{
 	friend std::ostream& operator<< (std::ostream& os, const JsonObject& obj);
 	friend class JsonPrimitive;
 	private:
-		std::map<std::string, JsonPrimitive*> m; // the map that hold key - value pair
 		/**
 		 * parse a given string into JsonObject without validation.
 		 * this can only be called by JsonPrimitive, or itself
@@ -82,6 +60,7 @@ class JsonObject{
 		 * 	std::string the string to parse JsonObject
 		 */
 		JsonObject(std::string*);
+		std::map<std::string, JsonPrimitive*> m; // the map that hold key - value pair
 	public:
 		/**
 		 * default constructor to create an empty JsonObject
@@ -137,7 +116,7 @@ class JsonArray{
 		 * input
 		 * 	std::string - the string to parse to json array
 		 */
-		JsonArray(std::string);
+		JsonArray(std::string*);
 	public:
 		JsonArray();
 		/**
@@ -150,12 +129,24 @@ class JsonArray{
 		 * 	throw std::invalid_argument when the index is out of range
 		 */
 		JsonPrimitive* get(int);
-		// store a string
-		void put(std::string);
-		// store a JsonArray
-		void put(JsonArray);
-		// store a JsonObject
-		void put(JsonObject);
+		/**
+		 * put a string into this JsonArray
+		 * input
+		 * 	std::string* - the pointer to the string to store
+		 */
+		void put(std::string*);
+		/**
+		 * put a JsonArray into this JsonArray
+		 * input
+		 * 	JsonArray* - the pointer to the JsonArray to store
+		 */
+		void put(JsonArray*);
+		/**
+		 * put a JsonObject into this JsonObject
+		 * input
+		 * 	JsonObject* - the poitner to the JsonObject
+		 */
+		void put(JsonObject*);
 		/**
 		 * remove and return a Json Primitive based on the index
 		 * input:
@@ -175,5 +166,5 @@ class JsonArray{
 		 * error
 		 * 	when the string is invalid
 		 */
-		static JsonArray* parse(std::string);
+		static JsonArray* parse(std::string*);
 };
