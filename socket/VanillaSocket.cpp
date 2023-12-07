@@ -63,6 +63,7 @@ Socket* Listener::acceptConnection(){
 
 Listener::~Listener() {
 	close(socketDescriptor);
+	delete &socketDescriptor;
 }
 
 Socket::Socket(int socket){
@@ -104,15 +105,15 @@ void Socket::write(const char* cStr, int length){
 
 std::string Socket::readLine(){
 	char buffer[1024] = {0}; // decalre the bufer to hold the incomming data
-//	size_t size = 1023;
-	std::string bufferString = ""; // the read buffer will be concaternated here and return
-	while (bufferString.length() == 0 || bufferString[bufferString.length() - 1] != '\n'){
+	std::string* bufferString = new std::string(""); // the read buffer will be concaternated here and return
+	while (bufferString->length() == 0 || (*bufferString)[bufferString->length() - 1] != '\n'){
 		::read(socketDescriptor, buffer, 1023); // read from buffer
-		bufferString += buffer; // concaternate into the string
+		*bufferString += buffer; // concaternate into the string
 	}
-	return bufferString;
+	return *bufferString;
 }
 
 Socket::~Socket(){
 	close(socketDescriptor);
+	delete &socketDescriptor;
 }
