@@ -1,6 +1,6 @@
 # Json
 ## Introduction
-This restructured ass classes: `JsonPrimitve`, `JsonObject`, `JsonArray`
+This restructured as classes: `JsonPrimitve`, `JsonObject`, `JsonArray`
 `JsonPrimitive` store pointer to a string.
 `JsonObject` store given objects in a map.
 `JsonArray` store given objects in a vector.
@@ -18,3 +18,8 @@ this recursively delete the object until reach a `JsonPrimitve` which holds a st
 ## Upcoming Ideas:
 + currently calling a destructor, if 2 or more places point to the same pointer, there will be malloc error of the pointer already de-allocated.
 + give a string then parse to `JsonObject` or `JsonArray`
+# Socket
+## Introduction
+Reordering the plain TCP Socket (no encryption), and Listener to easier to use. Simply call:
++ `new Listener(int port, int backlog)` to open a listener.
++ `new Socket(std::string address, int port)` to connect to `<address>:<port>`
