@@ -20,6 +20,15 @@ std::string JsonPrimitive::beautifyDisplay(int tab){
 	else return this->jsonObjPtr->beautifyDisplay(tab);
 }
 
+JsonPrimitive::~JsonPrimitive(){
+	delete this->jsonArrPtr;
+	this->jsonArrPtr = nullptr;
+	delete this->jsonObjPtr;
+	this->jsonObjPtr = nullptr;	
+	delete this->strPtr;
+	this->strPtr = nullptr;
+}
+
 JsonObject::JsonObject(){
 	mapPtr = new std::map<std::string, JsonPrimitive*>();
 }
@@ -79,6 +88,16 @@ std::string JsonObject::beautifyDisplay(int tab){
 	return str;
 }
 
+JsonObject::~JsonObject(){
+	for (std::map<std::string,JsonPrimitive*>::iterator itr = this->mapPtr->begin(); itr!=this->mapPtr->end(); itr++){
+		std::cout<<itr->first<<std::endl;
+		delete itr->second;
+	}
+	this->mapPtr->clear();
+	delete this->mapPtr;
+	this->mapPtr=nullptr;
+}
+
 JsonArray::JsonArray(){
 	this->vec = new std::vector<JsonPrimitive*>();
 }
@@ -133,4 +152,11 @@ std::string JsonArray::beautifyDisplay(int tab){
 	for(int i=0;i<tab-1;i++)str+="\t";
 	str+="]";
 	return str;
+}
+
+JsonArray::~JsonArray(){
+	for(std::vector<JsonPrimitive*>::iterator itr=this->vec->begin();itr!=this->vec->end();itr++)delete *itr;
+	this->vec->clear();
+	delete this->vec;
+	this->vec=nullptr;
 }

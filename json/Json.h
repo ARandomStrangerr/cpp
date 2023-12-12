@@ -35,6 +35,13 @@ class JsonPrimitive{
 		 *  JsonArray* a conversion of this pointer to json array
 		 */
 		JsonArray* getJsonArr();
+		/**
+		 * Destructor
+		 * delete the string, set the string pointer to nullptr
+		 * delete JsonArray, set the pointer to nullptr
+		 * delete JsonObject, set the pointer to nullptr
+		 */
+		~JsonPrimitive();
 };
 
 class JsonObject{
@@ -94,6 +101,11 @@ class JsonObject{
 		 * 	std::string - error message. when the given key does not associate with any value
 		 */
 		JsonPrimitive* remove(std::string);
+		/**
+		 * Destructor
+		 * evoke this will release all members of this json object.
+		 */
+		~JsonObject();
 };
 
 class JsonArray{
@@ -135,7 +147,7 @@ class JsonArray{
 		 * error:
 		 * 	std::string - error message. when the index is out of bound
 		 */
-		JsonPrimitive* get(int);
+		JsonPrimitive* get(int); 
 		/**
 		 * remove and return an element based on index from this json array
 		 * input:
@@ -146,4 +158,9 @@ class JsonArray{
 		 *	std::string - error message. when the index is out of bound
 		 */
 		JsonPrimitive* remove(int);
+		/**
+		 * Destructor
+		 * Evoke this will release memory of all elements stored within this array
+		 */
+		~JsonArray();
 };

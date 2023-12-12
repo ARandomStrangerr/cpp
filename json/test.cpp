@@ -28,8 +28,10 @@ int main(){
 	JsonArray* jsonArr = new JsonArray();
 	string* str4 = new string("value4");
 	string* str5 = new string("value5");
-	jsonArr->add(str3);
 	jsonArr->add(str4);
+	jsonArr->add(str5);
 	jsonObj->add("key4",jsonArr);
 	cout<<*jsonObj<<endl; // test overloading operator<< of JsonObject
+	delete jsonObj;
+	cout<<*str1<<endl;
 }
