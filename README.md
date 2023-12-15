@@ -1,6 +1,6 @@
 # Json
 ## Introduction
-This restructured as classes: `JsonPrimitve`, `JsonObject`, `JsonArray`
+This restructured as classes: `JsonPrimitive`, `JsonObject`, `JsonArray`
 `JsonPrimitive` store pointer to a string.
 `JsonObject` store given objects in a map.
 `JsonArray` store given objects in a vector.
@@ -20,6 +20,14 @@ add a JsonArray pointer to this Json Object<br/>
 input:<br/>
 &emsp;std::string - name of the key<br/>
 &emsp;JsonArray* - pointer to store under the aboe key (remember to allocate dynamically)
+### `JsonObject.get(std::string)`
+get an element associates with the string
+input:<br/>
+&emsp;std::string - name of the key<br/>
+output:<br/>
+&emsp;JsonPrimitive* - pointer to the JsonPrimitive associate with the key
+error:<br/>
+&emsp;std::string - error message. this often because the given key is not associated with any thing.
 ### `delete JsonObject`
 JsonObject destructor.<br/>
 Calling this will traverse through the underlaying map and de-allocate all the pointers within this JsonObject.
