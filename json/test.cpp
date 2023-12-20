@@ -9,6 +9,7 @@ int main(){
 	string* str1 = new string("value1"); // create a string pointer dynamically
 	string* str2 = new string("value2"); // create a string pointer dynamically
 	jsonObj->add("key1", str1); // test add string function of JsonObject
+	cout<<*jsonObj<<endl;
 	jsonObj->add("key2", str2);
 	try{
 		jsonObj->get("key3"); // test get function of JsonObject when the key does not exist
@@ -28,7 +29,7 @@ int main(){
 	JsonArray* jsonArr = new JsonArray();
 	string* str4 = new string("value4");
 	string* str5 = new string("value5");
-	jsonArr->add(str4);
+	jsonArr->add(str3);
 	jsonArr->add(str5);
 	jsonObj->add("key4",jsonArr);
 	cout<<*jsonObj<<endl; // test overloading operator<< of JsonObject

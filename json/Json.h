@@ -16,6 +16,7 @@ class JsonPrimitive{
 		JsonArray* jsonArrPtr;
 
 		std::string beautifyDisplay(int);
+		void erase(std::map<std::string*, int>*);
 	public:
 		/**
 		 * get the string holding by this JsonPrimitive.
@@ -55,6 +56,7 @@ class JsonObject{
 		 * 	int - number of tab (\t)
 		 */
 		std::string beautifyDisplay(int);
+		void erase(std::map<std::string*, int>*);
 	public:
 		/**
 		 * default constructor
@@ -115,6 +117,7 @@ class JsonArray{
 	private:
 		std::vector<JsonPrimitive*>* vec;
 		std::string beautifyDisplay(int);
+		void erase(std::map<std::string*,int>*);
 	public:
 		/**
 		 * default constructor

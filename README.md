@@ -1,3 +1,4 @@
+This project is just prime for fun.
 # Json
 ## Introduction
 This restructured as classes: `JsonPrimitive`, `JsonObject`, `JsonArray`
@@ -25,7 +26,7 @@ get an element associates with the string
 input:<br/>
 &emsp;std::string - name of the key<br/>
 output:<br/>
-&emsp;JsonPrimitive* - pointer to the JsonPrimitive associate with the key
+&emsp;JsonPrimitive* - pointer to the JsonPrimitive associate with the key<br/>
 error:<br/>
 &emsp;std::string - error message. this often because the given key is not associated with any thing.
 ### `delete JsonObject`

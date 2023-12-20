@@ -20,15 +20,26 @@ std::string JsonPrimitive::beautifyDisplay(int tab){
 	else return this->jsonObjPtr->beautifyDisplay(tab);
 }
 
-JsonPrimitive::~JsonPrimitive(){
-	delete this->jsonArrPtr;
-	this->jsonArrPtr = nullptr;
-	delete this->jsonObjPtr;
-	this->jsonObjPtr = nullptr;	
-	delete this->strPtr;
-	this->strPtr = nullptr;
+void JsonPrimitive::erase(std::map<std::string*, int>* map){
+	if (this->jsonArrPtr){
+		this->jsonArrPtr->erase(map);
+		this->jsonArrPtr = nullptr;
+	} else if (this->jsonObjPtr){
+		this->jsonObjPtr->erase(map);
+		this->jsonObjPtr = nullptr;
+	} else {
+		(*map)[this->strPtr]+=1;
+		this->strPtr = nullptr;
+	}
 }
 
+JsonPrimitive::~JsonPrimitive(){
+	std::map<std::string*, int>* m = new std::map<std::string*,int>();
+	this->erase(m);
+	for (std::map<std::string*, int>::iterator itr = m->begin(); itr!=m->end(); itr++) delete itr->first;
+	delete m;
+}
+ 
 JsonObject::JsonObject(){
 	mapPtr = new std::map<std::string, JsonPrimitive*>();
 }
@@ -88,14 +99,18 @@ std::string JsonObject::beautifyDisplay(int tab){
 	return str;
 }
 
-JsonObject::~JsonObject(){
-	for (std::map<std::string,JsonPrimitive*>::iterator itr = this->mapPtr->begin(); itr!=this->mapPtr->end(); itr++){
-		std::cout<<itr->first<<std::endl;
-		delete itr->second;
-	}
-	this->mapPtr->clear();
+void JsonObject::erase(std::map<std::string*, int>* m){
+	for (std::map<std::string,JsonPrimitive*>::iterator itr = this->mapPtr->begin();itr!=this->mapPtr->end();itr++)	itr->second->erase(m);
+	this->mapPtr->erase(this->mapPtr->begin(), this->mapPtr->end());
 	delete this->mapPtr;
-	this->mapPtr=nullptr;
+	this->mapPtr = nullptr;
+}
+
+JsonObject::~JsonObject(){
+	std::map<std::string*,int>* m = new std::map<std::string*,int>();
+	this->erase(m);
+	for (std::map<std::string*,int>::iterator itr=m->begin();itr!=m->end();itr++)delete itr->first;
+	delete m;
 }
 
 JsonArray::JsonArray(){
@@ -154,9 +169,16 @@ std::string JsonArray::beautifyDisplay(int tab){
 	return str;
 }
 
-JsonArray::~JsonArray(){
-	for(std::vector<JsonPrimitive*>::iterator itr=this->vec->begin();itr!=this->vec->end();itr++)delete *itr;
+void JsonArray::erase(std::map<std::string*,int>*m){
+	for(std::vector<JsonPrimitive*>::iterator itr=this->vec->begin();itr!=this->vec->end();itr++)(*itr)->erase(m);
 	this->vec->clear();
 	delete this->vec;
 	this->vec=nullptr;
+}
+
+JsonArray::~JsonArray(){
+	std::map<std::string*,int>* m = new std::map<std::string*,int>();
+	this->erase(m);
+	for (std::map<std::string*,int>::iterator itr = m->begin();itr!=m->end();itr++) delete itr->first;
+	delete m;
 }
