@@ -20,7 +20,7 @@ input:<br/>
 add a JsonArray pointer to this Json Object<br/>
 input:<br/>
 &emsp;std::string - name of the key<br/>
-&emsp;JsonArray* - pointer to store under the aboe key (remember to allocate dynamically)
+&emsp;JsonArray* - pointer to store under the above key (remember to allocate dynamically)
 ### `JsonObject.get(std::string)`
 get an element associates with the string
 input:<br/>
@@ -29,6 +29,14 @@ output:<br/>
 &emsp;JsonPrimitive* - pointer to the JsonPrimitive associate with the key<br/>
 error:<br/>
 &emsp;std::string - error message. this often because the given key is not associated with any thing.
+### `JsonObject.remove(std::string)`
+remove an object associates with the given string then return it</br>
+input:</br>
+&emsp;std::string - name of the key
+output:</br>
+&emsp;JsonPrimitive* - pointer to the removed JsonPrimitive
+error:</br>
+&emsp;std::string - error message, when there is not any JsonPrimitive pointer associated with the key.
 ### `delete JsonObject`
 JsonObject destructor.<br/>
 Calling this will traverse through the underlaying map and de-allocate all the pointers within this JsonObject.
@@ -48,7 +56,6 @@ input:<br/>
 JsonArray destructor<br/>
 Calling this will iterate through the underlaying vector and de-allocate all the pointers within this JsonArray.<br/>
 ## Upcoming Ideas:
-+ currently calling a destructor, if 2 or more places point to the same pointer, there will be malloc error of the pointer already de-allocated.
 + give a string then parse to `JsonObject` or `JsonArray`
 # Socket
 ## Introduction

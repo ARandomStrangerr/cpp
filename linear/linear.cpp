@@ -60,10 +60,28 @@ template<class T> class Matrix {
 		 * @brief:
 		 * sum 2 matricies
 		 * @params:
-		 * const Matrix<U>& the other maitrx 
+		 * const Matrix<U>& the other matrix 
 		 * 
 		 */
-		template<class U> Matrix<U> operator+ (const Matrix<U>&);
+		Matrix<T> operator+ (const Matrix<T>&);
+
+		/**
+		 * @breif
+		 * subtract 2 matricies
+		 * @params:
+		 * const Matrix<U>& the other matrix
+		 */
+		Matrix<T> operator- (const Matrix<T>&);
+
+		/**
+		 * @brief
+		 * multiply 2 matrixies
+		 * @params
+		 * const Matrix<U>& the other matrix
+		 * @err
+		 * when the size of the matrix are incorrect
+		 */
+		template<class U> Matrix<U> operator* (const Matrix<U>&);
 		template<class U> friend std::ostream& operator<< (std::ostream& os, const Matrix<U>&);
 
 };
@@ -93,12 +111,25 @@ template<class T> void Matrix<T>::set(size_t x, size_t y, T ele){
 }
 
 template<class T>
-template<class U>
-Matrix<U> Matrix<T>::operator+ (const Matrix<U>& other){
-	if (this->num_x != other.num_x || this->num_y != other.num_y) throw "2 matricies are not of the same sizes";
+Matrix<T> Matrix<T>::operator+ (const Matrix<T>& other){
+	if(this->num_x != other.num_x || this->num_y != other.num_y) throw "2 matricies are not of the same sizes";
 	T arr[this->num_x * this->num_y];
 	for (int i=0;i<this->num_x*this->num_y;i++) arr[i] = this->arr[i] + other.arr[i];
 	return *(new Matrix<T>(this->num_x,this->num_y,arr));
+}
+
+template<class T>
+Matrix<T> Matrix<T>::operator- (const Matrix<T>& other){
+	if(this->num_x != other.num_x || this->num_y != other.num_y) throw "2 matricies are not of the same size";
+	T arr[this->num_x * this->num_y];
+	for (int i=0;i<this->num_x*this->num_y;i++) arr[i] = this->arr[i]-other.arr[i];
+	return *(new Matrix<T>(this->num_x,this->num_y,arr));
+}
+
+template<class T>
+template<class U>
+Matrix<U> Matrix<T>::operator*(const Matrix<U>& other) {
+	if (this->num_x != other.num_y) throw "The column of first column is not equal to the row of the second matrix";
 }
 
 template<class U>
