@@ -60,8 +60,7 @@ template<class T> class Matrix {
 		 * @brief:
 		 * sum 2 matricies
 		 * @params:
-		 * const Matrix<U>& the other matrix 
-		 * 
+		 * const Matrix<U>& the other matrix
 		 */
 		Matrix<T> operator+ (const Matrix<T>&);
 
@@ -83,7 +82,6 @@ template<class T> class Matrix {
 		 */
 		template<class U> Matrix<U> operator* (const Matrix<U>&);
 		template<class U> friend std::ostream& operator<< (std::ostream& os, const Matrix<U>&);
-
 };
 
 template<class T> Matrix<T>::Matrix(){
