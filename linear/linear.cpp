@@ -89,8 +89,12 @@ template<class T> class Matrix {
 		 * @breif
 		 * scalar multiplication
 		 * @params
+		 * T scalar number to multiply with
+		 * @return
+		 * return a new matrix which is the scalar multiplication of this matrix
 		 */
 		Matrix<T> operator* (T);
+
 		template<class U> friend std::ostream& operator<< (std::ostream& os, const Matrix<U>&);
 };
 
@@ -147,6 +151,13 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T>& other) {
 		}
 	}
 	return *(new Matrix<T>(other.num_x,this->num_y,arr));
+}
+
+template<class T>
+Matrix<T> Matrix<T>::operator*(T scalar) {
+	T arr[this->num_x*this->num_y];
+	for(int i=0; i<this->num_x * this->num_y; i++) arr[i]=this->arr[i]*scalar;
+	return *(new Matrix<T>(this->num_x,this->num_y,arr));
 }
 
 template<class U>
