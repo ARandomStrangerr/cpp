@@ -74,13 +74,23 @@ template<class T> class Matrix {
 
 		/**
 		 * @brief
-		 * multiply 2 matrixies
-		 * @params
+		 * matrix multiplication. should implementation other algorithm
+		 * due to substract cancellation when addition with small number.
+		 * recommend to change it to Cannon's, Strassen's.
+		 * for the sake of simplicity, the standadrd matrix multiplication is implemented
+		  @params
 		 * const Matrix<U>& the other matrix
 		 * @err
 		 * when the size of the matrix are incorrect
 		 */
-		template<class U> Matrix<U> operator* (const Matrix<U>&);
+		Matrix<T> operator* (const Matrix<T>&);
+
+		/**
+		 * @breif
+		 * scalar multiplication
+		 * @params
+		 */
+		Matrix<T> operator* (T);
 		template<class U> friend std::ostream& operator<< (std::ostream& os, const Matrix<U>&);
 };
 
@@ -125,9 +135,18 @@ Matrix<T> Matrix<T>::operator- (const Matrix<T>& other){
 }
 
 template<class T>
-template<class U>
-Matrix<U> Matrix<T>::operator*(const Matrix<U>& other) {
+Matrix<T> Matrix<T>::operator*(const Matrix<T>& other) {
 	if (this->num_x != other.num_y) throw "The column of first column is not equal to the row of the second matrix";
+	T arr[this->num_y * other.num_x];
+	for (int y=0; y<other.num_y; y++){
+		for(int x=0; x<this->num_x; x++){
+			arr[x+other.num_x*y]=0;
+			for (int i=0; i<this->num_x; i++){
+				arr[x+other.num_x*y]+=this->arr[i+y*this->num_x]*other.arr[x+i*other.num_y];
+			}
+		}
+	}
+	return *(new Matrix<T>(other.num_x,this->num_y,arr));
 }
 
 template<class U>

@@ -5,5 +5,6 @@ int main() {
 	Matrix<int>* matrix1 = new Matrix<int>(3,3,templ);
 	Matrix<int>* matrix2 = new Matrix<int>(3,3,templ);
 	Matrix<int> sum = *matrix1-*matrix2;
-	std::cout << sum <<std::endl;
+	Matrix<int> multiply = *matrix1 * *matrix2;
+	std::cout << multiply <<std::endl;
 }
