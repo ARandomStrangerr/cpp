@@ -25,7 +25,7 @@ template<class T> class Matrix {
 		/**
 		 * destructor
 		 */
-		~Matrix();
+//		~Matrix();
 
 		/**
 		 * @brief:
@@ -60,6 +60,12 @@ template<class T> class Matrix {
 		 * when the index is out of bound
 		 */
 		void set(size_t, size_t, T);
+
+		/**
+		 * @breif
+		 * return a new matrix which is a tranpose of this matrix
+		 */
+		Matrix<T> tranpose();
 
 		/**
 		 * @brief:
@@ -117,12 +123,12 @@ template<class T> Matrix<T>::Matrix(unsigned int x, unsigned int y, const T* arr
 	for (int i = 0; i < x*y; i++) this->arr[i] = arr[i];
 }
 
-template<class T> Matrix<T>::~Matrix<T>(){
-	*(this->num_x) = nullptr;
-	*(this->num_y) = nullptr;
-	delete this->arr;
-	this->arr = nullptr;
-}
+//template<class T> Matrix<T>::~Matrix<T>(){
+//	delete &(this->num_x);
+//	delete &(this->num_y);
+//	delete this->arr;
+//	this->arr = nullptr;
+//}
 
 template<class T> T Matrix<T>::get(size_t x, size_t y){
 	if (x >= num_x || y > num_y) throw "the given index exceed the matrix";
@@ -132,6 +138,16 @@ template<class T> T Matrix<T>::get(size_t x, size_t y){
 template<class T> void Matrix<T>::set(size_t x, size_t y, T ele){
 	if (x >= num_x || y > num_y) throw "the given index exceed the matrix";
 	*arr[x+y*num_x] = ele;
+}
+
+template<class T> Matrix<T> Matrix<T>::tranpose(){
+	T arr[this->num_x*this->num_y];
+	for (int x=0; x<this->num_x;x++){
+		for (int y=0; y<this->num_y;y++){
+			arr[y+x*this->num_y] = this->arr[x+y*this->num_x];
+		}
+	}
+	return *(new Matrix<T>(this->num_y,this->num_x,arr));
 }
 
 template<class T>

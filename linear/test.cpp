@@ -16,4 +16,5 @@ int main() {
 	cout <<"MULTIPLY \n"<< multiply <<endl;
 	Matrix<int> scalarMultiply = *matrix1 * 2;
 	cout<<"SCALAR MULTIPLICATION\n" <<scalarMultiply<<endl;
+	cout<<"TRANSPOSE\n"<<matrix1->tranpose()<<endl;
 }
