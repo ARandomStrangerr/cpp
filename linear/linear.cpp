@@ -106,6 +106,15 @@ template<class T> class Matrix {
 		 */
 		Matrix<T> operator* (T);
 
+		/**
+		 * @brief
+		 * check if 2 matricies are equal to eachother
+		 * @return
+		 * true - if 2 matricies are equal to eachother
+		 * false - if 2 matricies are not equal to eachother
+		 */
+		bool operator== (const Matrix<T>);
+
 		template<class U> friend std::ostream& operator<< (std::ostream& os, const Matrix<U>&);
 };
 
@@ -186,6 +195,14 @@ Matrix<T> Matrix<T>::operator*(T scalar) {
 	T arr[this->num_x*this->num_y];
 	for(int i=0; i<this->num_x * this->num_y; i++) arr[i]=this->arr[i]*scalar;
 	return *(new Matrix<T>(this->num_x,this->num_y,arr));
+}
+
+template<class T>
+bool Matrix<T>::operator==(const Matrix<T> other){
+	if (this->num_x != other.num_x || this->num_y != other.num_y) return false;
+	for (int i=0; i<this->num_x*this->num_y; i++)
+		if (this->arr[i]!=other.arr[i]) return false;
+	return true;
 }
 
 template<class U>

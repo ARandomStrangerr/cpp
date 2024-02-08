@@ -14,7 +14,11 @@ int main() {
 	//test the overloaded * operator
 	Matrix<int> multiply = *matrix1 * *matrix2;
 	cout <<"MULTIPLY \n"<< multiply <<endl;
+	//test scalar multiplication
 	Matrix<int> scalarMultiply = *matrix1 * 2;
 	cout<<"SCALAR MULTIPLICATION\n" <<scalarMultiply<<endl;
+	//test transpose matrix
 	cout<<"TRANSPOSE\n"<<matrix1->tranpose()<<endl;
+	//test the overloaded == operator
+	cout <<"== OPERATOR\n"<<(*matrix1 == *matrix2?"TRUE":"FALSE")<<endl;
 }
