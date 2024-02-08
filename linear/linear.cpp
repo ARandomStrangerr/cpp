@@ -23,6 +23,11 @@ template<class T> class Matrix {
 		Matrix(unsigned int, unsigned int);
 
 		/**
+		 * destructor
+		 */
+		~Matrix();
+
+		/**
 		 * @brief:
 		 * create a matrix with the size and copy down the given array
 		 * @params:
@@ -110,6 +115,13 @@ template<class T> Matrix<T>::Matrix(unsigned int x, unsigned int y){
 
 template<class T> Matrix<T>::Matrix(unsigned int x, unsigned int y, const T* arr):Matrix(x,y){
 	for (int i = 0; i < x*y; i++) this->arr[i] = arr[i];
+}
+
+template<class T> Matrix<T>::~Matrix<T>(){
+	*(this->num_x) = nullptr;
+	*(this->num_y) = nullptr;
+	delete this->arr;
+	this->arr = nullptr;
 }
 
 template<class T> T Matrix<T>::get(size_t x, size_t y){
