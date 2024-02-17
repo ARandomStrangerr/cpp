@@ -63,9 +63,9 @@ template<class T> class Matrix {
 
 		/**
 		 * @breif
-		 * return a new matrix which is a tranpose of this matrix
+		 * return a new matrix which is a transpose of this matrix
 		 */
-		Matrix<T> tranpose();
+		Matrix<T> transpose();
 
 		/**
 		 * @brief:
@@ -149,7 +149,7 @@ template<class T> void Matrix<T>::set(size_t x, size_t y, T ele){
 	*arr[x+y*num_x] = ele;
 }
 
-template<class T> Matrix<T> Matrix<T>::tranpose(){
+template<class T> Matrix<T> Matrix<T>::transpose(){
 	T arr[this->num_x*this->num_y];
 	for (int x=0; x<this->num_x;x++){
 		for (int y=0; y<this->num_y;y++){
