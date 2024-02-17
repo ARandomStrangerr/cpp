@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <cstdio>
 #include <ios>
 #include <iostream>
 #include <string>
@@ -66,6 +67,14 @@ template<class T> class Matrix {
 		 * return a new matrix which is a transpose of this matrix
 		 */
 		Matrix<T> transpose();
+
+		/**
+		 * solving the matrix with Gaussian Elimination with LU decomposition method
+		 * current version does not decomposition to LU yet, it will be in the next update
+		 * current version does not solve the matrix with 0 in the main diagonal
+		 * the feature is called partial pivoting, it will be implemented later
+		 */
+		Matrix<T> gaussElimination();
 
 		/**
 		 * @brief:
@@ -157,6 +166,26 @@ template<class T> Matrix<T> Matrix<T>::transpose(){
 		}
 	}
 	return *(new Matrix<T>(this->num_y,this->num_x,arr));
+}
+
+template<class T> Matrix<T> Matrix<T>::gaussElimination() {
+	/*
+	 * the diagonal is (x,y) when x=y so one number will justify
+	 * the diagonal run until y-1 since the last row does not have anything below it to eliminate
+	 * proof that loop will eliminate: num_y is an infinite number which does not increase for each iteration
+	 * by increasing the counter by 1, eventually the variable diagonal will reach num_y
+	 */
+	for (int diagonal=0; diagonal<num_y-1; diagonal++) {
+		// the eliminate rows are row beneath the mail diagonal row; hence, eliminate row is diagonal + 1 till the last row
+		for (int eliminateRow=diagonal+1; eliminateRow<num_y; eliminateRow++){
+			double m = arr[diagonal+eliminateRow*num_x]/arr[diagonal+diagonal*num_x];
+			//printf("(%d,%d) = %f\n", diagonal, eliminateRow, arr[diagonal+eliminateRow*num_x]);
+			for (int x=diagonal; x<num_x; x++) {
+				arr[x+eliminateRow*num_x]-=m*arr[x+diagonal*num_x];	
+			}
+		}
+	}
+	return *(this);
 }
 
 template<class T>
