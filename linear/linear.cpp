@@ -24,11 +24,6 @@ template<class T> class Matrix {
 		Matrix(unsigned int, unsigned int);
 
 		/**
-		 * destructor
-		 */
-//		~Matrix();
-
-		/**
 		 * @brief:
 		 * create a matrix with the size and copy down the given array
 		 * @params:
@@ -45,6 +40,12 @@ template<class T> class Matrix {
 		 * Matrix<T> the matrix to clone
 		 */
 		Matrix(Matrix<T>*);
+
+		/**
+		 * @brief:
+		 * destructor
+		 */
+		~Matrix<T>();
 
 		/**
 		 * @brief
@@ -151,14 +152,19 @@ template<class T> Matrix<T>::Matrix(unsigned int x, unsigned int y, const T* arr
 
 template<class T> Matrix<T>::Matrix(Matrix<T>* matrixPtr):Matrix(matrixPtr->num_x, matrixPtr->num_y, matrixPtr->arr){}
 
+template<class T> Matrix<T>::~Matrix<T>(){
+	delete[] this->arr;
+	this->arr=nullptr;
+}
+
 template<class T> T Matrix<T>::get(size_t x, size_t y){
 	if (x >= num_x || y > num_y) throw "the given index exceed the matrix";
-	return *arr[x+y*num_x];
+	return arr[x+y*num_x];
 }
 
 template<class T> void Matrix<T>::set(size_t x, size_t y, T ele){
 	if (x >= num_x || y > num_y) throw "the given index exceed the matrix";
-	*arr[x+y*num_x] = ele;
+	arr[x+y*num_x] = ele;
 }
 
 template<class T> Matrix<T> Matrix<T>::transpose(){
@@ -196,7 +202,9 @@ Matrix<T> Matrix<T>::operator+ (const Matrix<T>& other){
 	if(this->num_x != other.num_x || this->num_y != other.num_y) throw "2 matricies are not of the same sizes";
 	T arr[this->num_x * this->num_y];
 	for (int i=0;i<this->num_x*this->num_y;i++) arr[i] = this->arr[i] + other.arr[i];
-	return *(new Matrix<T>(this->num_x,this->num_y,arr));
+	Matrix<T> matrix(this->num_x,this->num_y,arr);
+	std::cout<<&matrix<<std::endl;
+	return matrix;
 }
 
 template<class T>

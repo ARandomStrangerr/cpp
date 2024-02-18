@@ -21,6 +21,7 @@ int main() {
 	cout<<"TRANSPOSE\n"<<matrix1->transpose()<<endl;
 	//test the overloaded == operator
 	cout <<"== OPERATOR\n"<<(*matrix1 == *matrix2?"TRUE":"FALSE")<<endl;
+	cout <<"GAUSSIAN ELIMINATION" << endl;
 	double temp2[9] = {2,1,4,3,2,1,-1,4,-2};
 	Matrix<double>* matrix3 = new Matrix<double>(3,3,temp2);
 	cout <<matrix3->gaussElimination()<<endl;
