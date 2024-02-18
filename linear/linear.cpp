@@ -39,6 +39,14 @@ template<class T> class Matrix {
 		Matrix(unsigned int, unsigned int, const T*);
 
 		/**
+		 * @brief:
+		 * clone a given matrix
+		 * @params:
+		 * Matrix<T> the matrix to clone
+		 */
+		Matrix(Matrix<T>*);
+
+		/**
 		 * @brief
 		 * get an element of the matrix at the given position
 		 * @params:
@@ -141,12 +149,7 @@ template<class T> Matrix<T>::Matrix(unsigned int x, unsigned int y, const T* arr
 	for (int i = 0; i < x*y; i++) this->arr[i] = arr[i];
 }
 
-//template<class T> Matrix<T>::~Matrix<T>(){
-//	delete &(this->num_x);
-//	delete &(this->num_y);
-//	delete this->arr;
-//	this->arr = nullptr;
-//}
+template<class T> Matrix<T>::Matrix(Matrix<T>* matrixPtr):Matrix(matrixPtr->num_x, matrixPtr->num_y, matrixPtr->arr){}
 
 template<class T> T Matrix<T>::get(size_t x, size_t y){
 	if (x >= num_x || y > num_y) throw "the given index exceed the matrix";
