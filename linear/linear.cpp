@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <ios>
 #include <iostream>
+#include <ostream>
 #include <string>
 #include <iomanip>
 template<class T> class Matrix {
@@ -78,12 +79,20 @@ template<class T> class Matrix {
 		Matrix<T> transpose();
 
 		/**
+		 * @brief
 		 * solving the matrix with Gaussian Elimination with LU decomposition method
-		 * current version does not decomposition to LU yet, it will be in the next update
 		 * current version does not solve the matrix with 0 in the main diagonal
-		 * the feature is called partial pivoting, it will be implemented later
+		 * @return
+		 * a new instance of this matrix which is in the row echelon form
 		 */
 		Matrix<T> gaussElimination();
+		Matrix<T> luDecomposition();
+
+		/**
+		 * @brief
+		 * Using PLU decomposition to solve a matrix
+		 */
+		Matrix<T> solve();
 
 		/**
 		 * @brief:
@@ -184,17 +193,43 @@ template<class T> Matrix<T> Matrix<T>::gaussElimination() {
 	 * proof that loop will eliminate: num_y is an infinite number which does not increase for each iteration
 	 * by increasing the counter by 1, eventually the variable diagonal will reach num_y
 	 */
+	Matrix<T>* returnMatrix = new Matrix<T>(num_x, num_y, arr);
 	for (int diagonal=0; diagonal<num_y-1; diagonal++) {
+		// if the current row has 0 diagonal swap it with the bottom row
+		if (returnMatrix->arr[diagonal+diagonal*num_x]==0.0){
+			for (int x=diagonal; x<num_x; x++){
+				T temp = returnMatrix->arr[x+diagonal*num_x];
+				returnMatrix->arr[x+diagonal*num_x] = returnMatrix->arr[x+(num_y-1)*num_x];
+				returnMatrix->arr[x+(num_y-1)*num_x] = temp;
+			}
+
+		}
 		// the eliminate rows are row beneath the mail diagonal row; hence, eliminate row is diagonal + 1 till the last row
 		for (int eliminateRow=diagonal+1; eliminateRow<num_y; eliminateRow++){
-			double m = arr[diagonal+eliminateRow*num_x]/arr[diagonal+diagonal*num_x];
-			//printf("(%d,%d) = %f\n", diagonal, eliminateRow, arr[diagonal+eliminateRow*num_x]);
-			for (int x=diagonal; x<num_x; x++) {
-				arr[x+eliminateRow*num_x]-=m*arr[x+diagonal*num_x];	
+			double m = returnMatrix->arr[diagonal+eliminateRow*num_x]/returnMatrix->arr[diagonal+diagonal*num_x];
+			returnMatrix->arr[diagonal+eliminateRow*num_x]=0;
+			for (int x=diagonal+1; x<num_x; x++) {
+				returnMatrix->arr[x+eliminateRow*num_x]-=m*returnMatrix->arr[x+diagonal*num_x];	
 			}
 		}
 	}
-	return *(this);
+	return *(returnMatrix);
+}
+
+template<class T>
+Matrix<T> Matrix<T>::luDecomposition(){
+	Matrix<T>* returnMatrix = new Matrix<T>(this);
+	for (int diagonal=0; diagonal<num_y-1; diagonal++) {
+		// the eliminate rows are row beneath the mail diagonal row; hence, eliminate row is diagonal + 1 till the last row
+		for (int eliminateRow=diagonal+1; eliminateRow<num_y; eliminateRow++){
+			double m = returnMatrix->arr[diagonal+eliminateRow*num_x]/returnMatrix->arr[diagonal+diagonal*num_x];
+			returnMatrix->arr[diagonal+eliminateRow*num_x]=-m;
+			for (int x=diagonal+1; x<num_x; x++) {
+				returnMatrix->arr[x+eliminateRow*num_x]-=m*returnMatrix->arr[x+diagonal*num_x];	
+			}
+		}
+	}
+	return returnMatrix;
 }
 
 template<class T>

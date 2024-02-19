@@ -22,7 +22,9 @@ int main() {
 	//test the overloaded == operator
 	cout <<"== OPERATOR\n"<<(*matrix1 == *matrix2?"TRUE":"FALSE")<<endl;
 	cout <<"GAUSSIAN ELIMINATION" << endl;
-	double temp2[9] = {2,1,4,3,2,1,-1,4,-2};
-	Matrix<double>* matrix3 = new Matrix<double>(3,3,temp2);
+	double temp2[16] = {2,4,-2,-2,1,2,4,-3,-3,-3,8,-2,-1,1,6,-3};
+	Matrix<double>* matrix3 = new Matrix<double>(4,4,temp2);
 	cout <<matrix3->gaussElimination()<<endl;
+	cout <<"LU DECOMPOSITION"<<endl;
+	cout<<matrix3->luDecomposition()<<endl;
 }
