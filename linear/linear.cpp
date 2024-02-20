@@ -80,19 +80,25 @@ template<class T> class Matrix {
 
 		/**
 		 * @brief
-		 * solving the matrix with Gaussian Elimination with LU decomposition method
-		 * current version does not solve the matrix with 0 in the main diagonal
+		 * reduce the matrix to the row echelon form
 		 * @return
 		 * a new instance of this matrix which is in the row echelon form
 		 */
 		Matrix<T> gaussElimination();
-		Matrix<T> luDecomposition();
 
 		/**
 		 * @brief
-		 * Using PLU decomposition to solve a matrix
+		 * solve the matrix using LU decomposition. requirement is that this matrix mus be square matrix
+		 * partial pivoting is not implemented yet
+		 * @params
+		 * Matrix<T> the right hand side of the Ax=b
+		 * @return
+		 * a column vector as the solution of the system Ax=b
+		 * @error
+		 * the current matrix is not square.
+		 * the right hand side is in correct length.
 		 */
-		Matrix<T> solve();
+		Matrix<T> solve(Matrix<T>);
 
 		/**
 		 * @brief:
@@ -151,7 +157,7 @@ template<class T> Matrix<T>::Matrix(){
 
 template<class T> Matrix<T>::Matrix(unsigned int x, unsigned int y){
 	this->num_x = x;
-	this->num_y = y; 
+	this->num_y = y;
 	this->arr = new T[x*y];
 }
 
@@ -216,21 +222,40 @@ template<class T> Matrix<T> Matrix<T>::gaussElimination() {
 	return *(returnMatrix);
 }
 
-template<class T>
-Matrix<T> Matrix<T>::luDecomposition(){
+template<class T> Matrix<T> Matrix<T>::solve(Matrix<T> rhs){
+	// check for error
+	if (num_x != num_y) throw "this matrix is not square matrix";
+	if (rhs.num_y != num_y) throw "the right hand side column vector does not match with this matrix";
+	// copy the rhs
+	Matrix<T>* rhsCopy = new Matrix<T>(rhs);
+	// step 1: A = LU
 	Matrix<T>* returnMatrix = new Matrix<T>(this);
-	for (int diagonal=0; diagonal<num_y-1; diagonal++) {
-		// the eliminate rows are row beneath the mail diagonal row; hence, eliminate row is diagonal + 1 till the last row
-		for (int eliminateRow=diagonal+1; eliminateRow<num_y; eliminateRow++){
+	for(int diagonal = 0; diagonal<num_y-1; diagonal++){
+		for (int eliminateRow = diagonal+1; eliminateRow<num_y; eliminateRow++){
 			double m = returnMatrix->arr[diagonal+eliminateRow*num_x]/returnMatrix->arr[diagonal+diagonal*num_x];
-			returnMatrix->arr[diagonal+eliminateRow*num_x]=-m;
-			for (int x=diagonal+1; x<num_x; x++) {
-				returnMatrix->arr[x+eliminateRow*num_x]-=m*returnMatrix->arr[x+diagonal*num_x];	
+			returnMatrix->arr[diagonal+eliminateRow*num_x]=m;
+			for (int x=diagonal+1; x<num_x; x++){
+				returnMatrix->arr[x+eliminateRow*num_x]-=m*returnMatrix->arr[x+diagonal*num_x];
 			}
 		}
 	}
-	return returnMatrix;
+	// step 2: solve the system Lz=b
+	for (int y=1;y<num_y;y++){
+		for (int x=0; x<y; x++){
+			rhsCopy->arr[y]-=rhsCopy->arr[x]*returnMatrix->arr[x+y*num_x];
+		}
+	}
+	// step 3: solve the system Ux=z
+	for (int y=num_y-1;y>=0;y--){
+		for (int x=num_x-1; x>y; x--){
+			rhsCopy->arr[y]-=rhsCopy->arr[x]*returnMatrix->arr[x+y*num_x];
+		}
+		rhsCopy->arr[y]=rhsCopy->arr[y]/returnMatrix->arr[y+y*num_x];
+	}
+	delete returnMatrix;
+	return rhsCopy;
 }
+
 
 template<class T>
 Matrix<T> Matrix<T>::operator+ (const Matrix<T>& other){

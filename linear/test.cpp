@@ -21,10 +21,16 @@ int main() {
 	cout<<"TRANSPOSE\n"<<matrix1->transpose()<<endl;
 	//test the overloaded == operator
 	cout <<"== OPERATOR\n"<<(*matrix1 == *matrix2?"TRUE":"FALSE")<<endl;
+	// test the Gaussian Elimination
 	cout <<"GAUSSIAN ELIMINATION" << endl;
 	double temp2[16] = {2,4,-2,-2,1,2,4,-3,-3,-3,8,-2,-1,1,6,-3};
 	Matrix<double>* matrix3 = new Matrix<double>(4,4,temp2);
 	cout <<matrix3->gaussElimination()<<endl;
-	cout <<"LU DECOMPOSITION"<<endl;
-	cout<<matrix3->luDecomposition()<<endl;
+	// test the LU decomposition
+	double temp3[9] = {2,1,4,3,2,1,-1,4,-2};
+	double temp4[3] = {7,1,1};
+	Matrix<double>* A = new Matrix<double>(3,3,temp3);
+	Matrix<double>* rhs = new Matrix<double>(1,3,temp4);
+	Matrix<double> solution = A->solve(*rhs);
+	cout<<solution<<endl;
 }
