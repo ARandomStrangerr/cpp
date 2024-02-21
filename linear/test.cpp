@@ -27,10 +27,8 @@ int main() {
 	Matrix<double>* matrix3 = new Matrix<double>(4,4,temp2);
 	cout <<matrix3->gaussElimination()<<endl;
 	// test the LU decomposition
-	double temp3[9] = {2,1,4,3,2,1,-1,4,-2};
-	double temp4[3] = {7,1,1};
-	Matrix<double>* A = new Matrix<double>(3,3,temp3);
-	Matrix<double>* rhs = new Matrix<double>(1,3,temp4);
-	Matrix<double> solution = A->solve(*rhs);
+	double temp3[4] = {7,4,-7,1};
+	Matrix<double>* matrix4 = new Matrix<double>(1,4,temp3);
+	Matrix<double> solution = matrix3->solve(*matrix4);
 	cout<<solution<<endl;
 }
