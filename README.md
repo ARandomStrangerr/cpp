@@ -25,6 +25,6 @@ A class perform basic linear algebra. I will insert animation later on so that i
 `size_t` unsinged integer for x (column) in the table
 `size_t` unsigned integer for y (row) in the table
 @return:  
-`T` the data at the cell
-@error:
+`T` the data at the cell  
+@error:  
 `string` error message, index is out of bound
