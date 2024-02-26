@@ -20,7 +20,7 @@ A class perform basic linear algebra. I will insert animation later on so that i
 @params:  
 `Matrix<T>*`: poitner to the matrix to copy  
 
-`T get(size_t, size_t)` get element at specified location
+`T get(size_t, size_t)` get element at specified location  
 @params:  
 `size_t` unsinged integer for x (column) in the table
 `size_t` unsigned integer for y (row) in the table
