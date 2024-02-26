@@ -23,8 +23,8 @@ A class perform basic linear algebra. I will insert animation later on so that i
 `T get(size_t, size_t)` get element at specified location  
 @params:  
 `size_t` unsinged integer for x (column) in the table
-`size_t` unsigned integer for y (row) in the table
+`size_t` unsigned integer for y (row) in the table  
 @return:  
-`T` the data at the cell  
+`T` the data at the indicated cell  
 @error:  
 `string` error message, index is out of bound
