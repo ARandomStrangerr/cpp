@@ -28,3 +28,8 @@ A class perform basic linear algebra. I will insert animation later on so that i
 `T` the data at the indicated cell  
 @error:  
 `string` error message, index is out of bound
+
+an inllustration for LU decomposition:  
+![](https://github.com/ARandomStrangerr/cpp/blob/main/linear/Matrix-ezgif.com-video-to-gif-converter.gif)
+  
+all the illustrations is scripted on [Google Colab-notebook](https://colab.research.google.com/drive/1w-wrmK5GKy6GDv7AoIVimvzwBzArBPJw?usp=sharing)
