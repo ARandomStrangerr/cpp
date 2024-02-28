@@ -102,6 +102,8 @@ public:
    */
   Matrix<T> solve(Matrix<T>);
 
+  Matrix<double> inverse();
+
   /**
    * @brief:
    * sum 2 matricies
@@ -231,7 +233,7 @@ template <class T> Matrix<T> Matrix<T>::solve(Matrix<T> rhs) {
   if (num_x != num_y) throw "this matrix is not square matrix";
   if (rhs.num_y != num_y) throw "the right hand side column vector does not match with this matrix";
   // copy the rhs
-  Matrix<T> *rhsCopy = new Matrix<T>(1,4);
+  Matrix<T> *rhsCopy = new Matrix<T>(1,rhs.num_y);
   // make the pivor array
   int pvt[num_y];
   for (int i = 0; i < num_y; i++) pvt[i] = i;
@@ -258,7 +260,7 @@ template <class T> Matrix<T> Matrix<T>::solve(Matrix<T> rhs) {
   }
   // step 2: perform swap row of the rhs
   for (int y = 0; y < num_y; y++) rhsCopy->arr[y] = rhs.arr[pvt[y]];
-  // step 3: solve the system (PL)z=Pb
+  // step 3: now we have PLUx=Pb, let z=Ux, solve the system (PL)z=Pb
   for (int y = 1; y < num_y; y++) {
     for (int x = 0; x < y; x++) {
       rhsCopy->arr[y] -= rhsCopy->arr[x] * returnMatrix->arr[x + y * num_x];
@@ -273,6 +275,57 @@ template <class T> Matrix<T> Matrix<T>::solve(Matrix<T> rhs) {
   }
   delete returnMatrix;
   return rhsCopy;
+}
+
+template <class T> Matrix<double> Matrix<T>::inverse(){
+  // copy this matrix to decompose
+  Matrix<T> *copyMatrix = new Matrix<T>(this);
+  // pivor array
+  int pvt[num_y];
+  for (int i = 0; i < num_y; i++) pvt[i] = i;
+  // decompose the matrix to PLU
+  for (int diagonal = 0; diagonal < num_y - 1; diagonal++) {
+    // the current diagonal has 0 pivot entry, swap it with the botton row
+    if (copyMatrix->arr[diagonal + diagonal * num_x] == 0) {
+      for (int x = 0; x < num_x; x++) {
+        T temp = copyMatrix->arr[x + diagonal * num_x];
+        copyMatrix->arr[x + diagonal * num_x] = copyMatrix->arr[x + (num_y - 1) * num_x];
+        copyMatrix->arr[x + (num_y - 1) * num_x] = temp;
+      }
+      // swap the pivot entries
+      pvt[diagonal] = pvt[num_y - 1];
+      pvt[num_y - 1] = diagonal;
+    }
+    for (int eliminateRow = diagonal + 1; eliminateRow < num_y; eliminateRow++) {
+      double m = copyMatrix->arr[diagonal + eliminateRow * num_x] / copyMatrix->arr[diagonal + diagonal * num_x];
+      copyMatrix->arr[diagonal + eliminateRow * num_x] = m;
+      for (int x = diagonal + 1; x < num_x; x++) copyMatrix->arr[x + eliminateRow * num_x] -= m * copyMatrix->arr[x + diagonal * num_x];
+    }
+  }
+  // the inverse matrix
+  Matrix<double>* returnMatrix = new Matrix<double>(num_x, num_y);
+  for (int y=0;y<num_y;y++){
+    returnMatrix->arr[pvt[y]+y*num_x]=1;
+  }
+  // solve for each column of the return matrix
+  for (int col=0; col < num_x; col++){
+    // solve the forward sub
+    for (int y = 1; y < num_y; y++){
+      for (int x = 0; x < y; x++){
+        returnMatrix->arr[col+y*num_x]-=returnMatrix->arr[col+x*num_x]*copyMatrix->arr[x+y*num_x];
+      }
+    }
+    // solve the backward sub
+    for (int y = num_y-1; y >= 0; y--){
+      for (int x = num_x-1; x > y; x--){
+        returnMatrix->arr[col+y*num_x] -= returnMatrix->arr[col+x*num_x] * copyMatrix->arr[x+y*num_x];
+      }
+      returnMatrix->arr[col+y*num_x] = returnMatrix->arr[col+y*num_x] / copyMatrix->arr[y+y*num_x];
+    }
+  }
+  std::cout<<returnMatrix->num_x<<std::endl;
+  //delete copyMatrix;
+  return returnMatrix;
 }
 
 template <class T> Matrix<T> Matrix<T>::operator+(const Matrix<T> &other) {
@@ -296,9 +349,7 @@ template <class T> Matrix<T> Matrix<T>::operator-(const Matrix<T> &other) {
 }
 
 template <class T> Matrix<T> Matrix<T>::operator*(const Matrix<T> &other) {
-  if (this->num_x != other.num_y)
-    throw "The column of first column is not equal to the row of the second "
-          "matrix";
+  if (this->num_x != other.num_y) throw "The column of first column is not equal to the row of the second matrix";
   T arr[this->num_y * other.num_x];
   for (int y = 0; y < other.num_y; y++) {
     for (int x = 0; x < this->num_x; x++) {
