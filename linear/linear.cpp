@@ -7,8 +7,9 @@
 
 template <class T> class Matrix {
 private:
-unsigned int num_x, num_y;
+	unsigned int num_x, num_y;
 	T *arr;
+	void PLU(Matrix<double>*, int*);
 
 public:
 	/**
@@ -101,7 +102,7 @@ public:
 	 * the right hand side is in correct length.
 	 */
 	Matrix<T> solve(Matrix<T>);
-	
+
 	/**
 	 * @brief
 	 * inverse this matrix
@@ -234,6 +235,28 @@ template <class T> Matrix<T> Matrix<T>::gaussElimination() {
 	return *(returnMatrix);
 }
 
+template <class T> void Matrix<T>::PLU(Matrix<double>* matrix, int* pvt){
+	for (int diagonal = 0; diagonal < num_y - 1; diagonal++) {
+		// the current diagonal has 0 pivot entry, swap it with the botton row
+		if (matrix->arr[diagonal + diagonal * num_x] == 0) {
+			for (int x = 0; x < num_x; x++) {
+				T temp = matrix->arr[x + diagonal * num_x];
+				matrix->arr[x + diagonal * num_x] = matrix->arr[x + (num_y - 1) * num_x];
+				matrix->arr[x + (num_y - 1) * num_x] = temp;
+			}
+			// swap the pivot entries
+			// this can happens due to the swap happened only once at the current row; hence, pvt[pivot_row] = pivot_row always, not some other number
+			pvt[diagonal] = pvt[num_y - 1];
+			pvt[num_y - 1] = diagonal;
+		}
+		for (int eliminateRow = diagonal + 1; eliminateRow < num_y; eliminateRow++) {
+			double m = matrix->arr[diagonal + eliminateRow * num_x] / matrix->arr[diagonal + diagonal * num_x];
+			matrix->arr[diagonal + eliminateRow * num_x] = m;
+			for (int x = diagonal + 1; x < num_x; x++) matrix->arr[x + eliminateRow * num_x] -= m * matrix->arr[x + diagonal * num_x];
+		}
+	}
+}
+
 template <class T> Matrix<T> Matrix<T>::solve(Matrix<T> rhs) {
 	// check for error
 	if (num_x != num_y) throw "this matrix is not square matrix";
@@ -244,26 +267,8 @@ template <class T> Matrix<T> Matrix<T>::solve(Matrix<T> rhs) {
 	int pvt[num_y];
 	for (int i = 0; i < num_y; i++) pvt[i] = i;
 	// step 1: PA = PLU
-	Matrix<T> *returnMatrix = new Matrix<T>(this);
-	for (int diagonal = 0; diagonal < num_y - 1; diagonal++) {
-		// the current diagonal has 0 pivot entry, swap it with the botton row
-		if (returnMatrix->arr[diagonal + diagonal * num_x] == 0) {
-			for (int x = 0; x < num_x; x++) {
-				T temp = returnMatrix->arr[x + diagonal * num_x];
-				returnMatrix->arr[x + diagonal * num_x] = returnMatrix->arr[x + (num_y - 1) * num_x];
-				returnMatrix->arr[x + (num_y - 1) * num_x] = temp;
-			}
-			// swap the pivot entries
-			// this can happens due to the swap happened only once at the current row; hence, pvt[pivot_row] = pivot_row always, not some other number
-			pvt[diagonal] = pvt[num_y - 1];
-			pvt[num_y - 1] = diagonal;
-		}
-		for (int eliminateRow = diagonal + 1; eliminateRow < num_y; eliminateRow++) {
-			double m = returnMatrix->arr[diagonal + eliminateRow * num_x] / returnMatrix->arr[diagonal + diagonal * num_x];
-			returnMatrix->arr[diagonal + eliminateRow * num_x] = m;
-			for (int x = diagonal + 1; x < num_x; x++) returnMatrix->arr[x + eliminateRow * num_x] -= m * returnMatrix->arr[x + diagonal * num_x];
-		}
-	}
+	Matrix<double> *returnMatrix = new Matrix<T>(this);
+	PLU(returnMatrix, pvt);
 	// step 2: perform swap row of the rhs
 	for (int y = 0; y < num_y; y++) rhsCopy->arr[y] = rhs.arr[pvt[y]];
 	// step 3: now we have PLUx=Pb, let z=Ux, solve the system (PL)z=Pb
@@ -285,29 +290,12 @@ template <class T> Matrix<T> Matrix<T>::solve(Matrix<T> rhs) {
 
 template <class T> Matrix<double> Matrix<T>::inverse(){
 	// copy this matrix to decompose
-	Matrix<T> *copyMatrix = new Matrix<T>(this);
+	Matrix<double> *copyMatrix = new Matrix<T>(this);
 	// pivor array
 	int pvt[num_y];
 	for (int i = 0; i < num_y; i++) pvt[i] = i;
 	// decompose the matrix to PLU
-	for (int diagonal = 0; diagonal < num_y - 1; diagonal++) {
-		// the current diagonal has 0 pivot entry, swap it with the botton row
-		if (copyMatrix->arr[diagonal + diagonal * num_x] == 0) {
-			for (int x = 0; x < num_x; x++) {
-				T temp = copyMatrix->arr[x + diagonal * num_x];
-				copyMatrix->arr[x + diagonal * num_x] = copyMatrix->arr[x + (num_y - 1) * num_x];
-				copyMatrix->arr[x + (num_y - 1) * num_x] = temp;
-			}
-			// swap the pivot entries
-			pvt[diagonal] = pvt[num_y - 1];
-			pvt[num_y - 1] = diagonal;
-		}
-		for (int eliminateRow = diagonal + 1; eliminateRow < num_y; eliminateRow++) {
-			double m = copyMatrix->arr[diagonal + eliminateRow * num_x] / copyMatrix->arr[diagonal + diagonal * num_x];
-			copyMatrix->arr[diagonal + eliminateRow * num_x] = m;
-			for (int x = diagonal + 1; x < num_x; x++) copyMatrix->arr[x + eliminateRow * num_x] -= m * copyMatrix->arr[x + diagonal * num_x];
-		}
-	}
+	PLU(copyMatrix, pvt);
 	// the inverse matrix
 	Matrix<double>* returnMatrix = new Matrix<double>(num_x, num_y);
 	for (int y=0;y<num_y;y++){
