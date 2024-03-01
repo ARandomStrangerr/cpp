@@ -51,23 +51,23 @@ Primitive::Primitive(Array* arrPtr){
 }
 
 Primitive::~Primitive(){
-	switch (type) {
-		case Type::STRING:
-			delete &str;
-			break;
-		case Type::NUMBER:
-			delete &num;
-			break;
-		case Type::BOOLEAN:
-			delete &boo;
-			break;
-		case Type::ARRAY:
-			delete arrPtr;
-			break;
-		case Type::OBJECT:
-			delete objPtr;
-			break;
-	}
+	// switch (type) {
+	// 	case Type::STRING:
+	// 		delete &str;
+	// 		break;
+	// 	case Type::NUMBER:
+	// 		delete &num;
+	// 		break;
+	// 	case Type::BOOLEAN:
+	// 		delete &boo;
+	// 		break;
+	// 	case Type::ARRAY:
+	// 		delete arrPtr;
+	// 		break;
+	// 	case Type::OBJECT:
+	// 		delete objPtr;
+	// 		break;
+	// }
 }
 
 std::string Primitive::getStr(){
@@ -127,7 +127,10 @@ Primitive Object::get(std::string key){
 }
 
 void Object::remove(std::string key){
-	map.erase(key);
+	if (map.find(key) != map.end()){
+		delete map[key];
+		map.erase(key);
+	}
 }
 
 void Object::set(std::string key,std::string value){
@@ -164,20 +167,107 @@ std::ostream& operator<< (std::ostream& os, const Object& obj){
 	return os;
 }
 
+/**
+support method to get the key of key-value pair.
+the return value is not allocated dynamically
+*/
 std::string getKey(int& startIndex, const std::string& str){
 	for (int endIndex = startIndex; endIndex < str.length(); endIndex++){
-		switch (str[endIndex]) {
-			case ':': // key stroke seprate between key and value
-				std::string returnValue = str.substr(startIndex, endIndex - startIndex); // obtain the substring
-				// beautify the string
-				returnValue.erase(0, returnValue.find_first_not_of(" "));
-				returnValue.erase(returnValue.find_last_not_of(" "))
-				return returnValue
+		if (str[endIndex] == ':'){ // key stroke seprate between key and value
+			std::string returnValue = str.substr(startIndex, endIndex - startIndex); // obtain the substring
+			// beautify the string
+			returnValue.erase(0, returnValue.find_first_not_of(" "));
+			returnValue.erase(returnValue.find_last_not_of(" ")+1);
+			// if there is quote at 2 ends, remove it
+			if (returnValue[0] == '"') returnValue.erase(0,1);
+			if (returnValue[returnValue.length() -1] == '"') returnValue.erase(returnValue.length()-1);
+			// regex checking the syntax of the variable name
+			std::regex pattern("^[a-zA-Z_][a-zA-Z0-9_]*$");
+			if (!std::regex_search(returnValue, pattern)) throw std::runtime_error("variable name is invalid");
+			startIndex = endIndex;
+			return returnValue;
 		}
 	}
 	throw std::runtime_error("missing :");
 }
 
-Object Object::parse(const std::string&){
+/**
+support method to get value number of key-value pair
+*/
+double getNumber(int& startIndex, const std::string& str){
+	std::string tempVal;
+	for (int endIndex = startIndex; endIndex < str.length(); endIndex++){
+		switch (str[endIndex]) {
+			case ',': // cases that terminate the loop
+			case ']':
+			case '}':
+				tempVal = str.substr(startIndex, endIndex - startIndex);
+				startIndex = endIndex;
+				return std::stod(tempVal);
+				break;
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+			case '.':
+				break;
+			default:
+				throw std::runtime_error("not a number at character " + std::to_string(endIndex));
+				break;
+		}
+	}
+	throw std::runtime_error("missing terminate character");
+	return 0;
+}
 
+/**
+support method to get the boolean value of key-value pair
+*/
+bool getBoolean(int& startIndex, const std::string& str){
+	std::string evaluateStr = str.substr(startIndex, 4);
+	startIndex+=4;
+	if (evaluateStr == "true") return 1;
+	else if (evaluateStr == "fase") return 0;
+	else throw std::runtime_error("invalid value at " + std::to_string(startIndex - 4));
+}
+
+/**
+support function to get object value
+*/
+Object getObject(int& startIndex, const std::string& str){
+	Object obj = *(new Object()); // dynatmically allocate object
+	int openBrace = 0; // count the braces
+	for (int endIndex = startIndex; endIndex < str.length(); endIndex++){
+		switch(str[endIndex]){
+			case "{":
+				openBrace++;
+				endIndex++;
+				std::string key = getKey(endIndex, str);
+				
+				break;
+			case "}":
+				openBrace--;
+				if (openBrace == 0) return obj;
+				break;
+
+		}
+	}
+}
+
+/**
+support function to get array returnValue
+*/
+Array getArray(int& startIndex, const std::string& str){
+
+}
+
+Object Object::parse(const std::string& str) {
+
+	return *(new Object());
 }

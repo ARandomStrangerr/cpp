@@ -4,6 +4,8 @@
 #include <vector>
 #include <iostream>
 #include <stdexcept>
+#include <cstdlib>
+#include <regex>
 
 enum class Type;
 class Primitive;
