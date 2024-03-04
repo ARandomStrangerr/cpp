@@ -110,6 +110,24 @@ public:
 	 * a matrix wich is the inverse of this matrix
 	 */
 	Matrix<double> inverse();
+	
+	/**
+	 * @brief:
+	 * norm 1 of this matrix.
+	 * max column sum.
+	 * @return
+	 * a number represent norm 1
+	 */
+	T norm1();
+
+	/**
+	 * @brief:
+	 * norm infinity of the matrix.
+	 * max row sum.
+	 * @return
+	 * a number represent norm infinity
+	 */
+	T normInfinity();
 
 	/**
 	 * @brief:
@@ -318,8 +336,32 @@ template <class T> Matrix<double> Matrix<T>::inverse(){
 		}
 	}
 	std::cout<<returnMatrix->num_x<<std::endl;
-	//delete copyMatrix;
+	delete copyMatrix;
 	return returnMatrix;
+}
+
+template<class T>
+T Matrix<T>::norm1(){
+	T maxColumn = 0;
+	T sumColumn;
+	for (int x=0; x<num_x; x++){
+		sumColumn = 0;
+		for (int y=0; y<num_y; y++) sumColumn+=arr[x+y*num_x];
+		if (sumColumn>maxColumn) maxColumn = sumColumn;
+	}
+	return maxColumn;
+}
+
+template<class T>
+T Matrix<T>::normInfinity(){
+	T maxRow = 0;
+	T sumRow;
+	for (int y=0; y<num_y; y++){
+		sumRow = 0;
+		for(int x=0; x<num_x; x++) sumRow+=arr[x+y*num_x];
+		if (sumRow > maxRow) maxRow = sumRow;
+	}
+	return maxRow;
 }
 
 template <class T> Matrix<T> Matrix<T>::operator+(const Matrix<T> &other) {
