@@ -110,7 +110,7 @@ public:
 	 * a matrix wich is the inverse of this matrix
 	 */
 	Matrix<double> inverse();
-	
+
 	/**
 	 * @brief:
 	 * norm 1 of this matrix.
@@ -128,6 +128,15 @@ public:
 	 * a number represent norm infinity
 	 */
 	T normInfinity();
+
+	/**
+	 * @breif:
+	 * calcuate the conditional number.
+	 * the conditional tell about how well the matrix is behaved
+	 * @return:
+	 * T a number represent conditional number
+	 */
+	T conditionalNum();
 
 	/**
 	 * @brief:
@@ -362,6 +371,15 @@ T Matrix<T>::normInfinity(){
 		if (sumRow > maxRow) maxRow = sumRow;
 	}
 	return maxRow;
+}
+
+template <class T>
+T Matrix<T>::conditionalNum(){
+	T norm1 = this->norm1();
+	Matrix<T> inverse = this -> inverse();
+	T norm1Inverse = inverse -> norm1();
+	delete inverse;
+	return norm1 * norm1Inverse;
 }
 
 template <class T> Matrix<T> Matrix<T>::operator+(const Matrix<T> &other) {
