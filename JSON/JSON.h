@@ -8,15 +8,62 @@
 #include <regex>
 
 enum class Type;
+class Parse;
 class Primitive;
 class Object;
 class Array;
 
 enum class Type{STRING, NUMBER, BOOLEAN, ARRAY, OBJECT};
 
+class Parse {
+	public:
+		/**
+		@brief:
+		get the key of the key:value pair.
+		parse the string until it see ':'
+		clean up the string by delete ' ' and quote at 2 ends
+		check if the string is fit to be variable by regex
+		@params:
+		int& pass by reference of the begin index to start parsing
+		std::string the string to parse
+		@return:
+		std::string a non-dynamicall-allocated string represent key.
+		@error:
+		std::runtime_error when it is the end of the given string and it is still not meet ':'.
+		std::runtime_error when the variable is not fit to be variable name
+		*/
+		static std::string getKey(int&, const std::string&);
+
+		static std::string getString(int&, const std::string&);
+
+		static double getNumber(int&, const std::string&);
+
+		static bool getBoolean(int&, const std::string&);
+
+		/**
+		@breif:
+		get the Object represent value of key:value pair
+		parse until pair '{' and '}' are equal
+		@params:
+		int& pass by reference of the begin index to start parsing
+		std::string the string to parse
+		@return:
+		Object dynaically-allocated object
+		@error:
+		std::runtime_error when it is the end of the given string and pair '{' and '}' are not equal
+		std::runtime_error when there is a character out of place
+		*/
+		static Object getObject(int&, const std::string&);
+		static Array getArray(int&, const std::string&);
+
+	friend class Primitive;
+	friend class Object;
+	friend class Array;
+};
+
 /**
 this class must be deleted after use since it allocates memory dynamically.
-the it design in a way such that
+it design in a way such that when the original given variable is deleted, the varibale in this class does not point to a nulptr or deleted pointer.
 */
 class Primitive{
 	private:
@@ -151,6 +198,7 @@ class Object{
 		std::unordered_map<std::string, Primitive*> map;
 	public:
 		Object();
+		Object(std::string);
 		Primitive get(std::string);
 		void remove(std::string);
 		void set(std::string, std::string);
@@ -158,14 +206,16 @@ class Object{
 		void set(std::string, bool);
 		void set(std::string, Object);
 		void set(std::string, Array);
-		friend std::ostream& operator<< (std::ostream&, const Object&);
 		static Object parse(const std::string&);
+		friend std::ostream& operator<< (std::ostream&, const Object&);
 };
 
 class Array{
 	private:
-		std::vector<Primitive*> vec;
+		std::vector<Primitive*>* vec;
 	public:
+		Array();
+		Array(std::string);
 		Primitive* getPtr(int);
 		Primitive* deletePtr(int);
 		void setPtr(int, Primitive*);

@@ -1,5 +1,7 @@
 #include "JSON.h"
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 Primitive::Primitive(std::string str){
 	this->str = *(new std::string(str));
@@ -158,6 +160,11 @@ void Object::set(std::string key, Array value){
 	map[key] = primitive;
 }
 
+Object Object::parse(const std::string& str){
+	int startValue = 0;
+	return Parse::getObject(startValue, str);
+}
+
 std::ostream& operator<< (std::ostream& os, const Object& obj){
 	os << "{\n";
 	for (const auto& itr : obj.map){
@@ -171,7 +178,7 @@ std::ostream& operator<< (std::ostream& os, const Object& obj){
 support method to get the key of key-value pair.
 the return value is not allocated dynamically
 */
-std::string getKey(int& startIndex, const std::string& str){
+std::string Parse::getKey(int& startIndex, const std::string& str){
 	for (int endIndex = startIndex; endIndex < str.length(); endIndex++){
 		if (str[endIndex] == ':'){ // key stroke seprate between key and value
 			std::string returnValue = str.substr(startIndex, endIndex - startIndex); // obtain the substring
@@ -183,7 +190,7 @@ std::string getKey(int& startIndex, const std::string& str){
 			if (returnValue[returnValue.length() -1] == '"') returnValue.erase(returnValue.length()-1);
 			// regex checking the syntax of the variable name
 			std::regex pattern("^[a-zA-Z_][a-zA-Z0-9_]*$");
-			if (!std::regex_search(returnValue, pattern)) throw std::runtime_error("variable name is invalid");
+			if (!std::regex_search(returnValue, pattern)) throw std::runtime_error("variable name is invalid at " + std::to_string(startIndex));
 			startIndex = endIndex;
 			return returnValue;
 		}
@@ -191,21 +198,32 @@ std::string getKey(int& startIndex, const std::string& str){
 	throw std::runtime_error("missing :");
 }
 
-/**
-support method to get value number of key-value pair
-*/
-double getNumber(int& startIndex, const std::string& str){
+std::string Parse::getString(int& startIndex, const std::string& str){
+	for (int endIndex = startIndex + 1; endIndex < str.length(); endIndex++){ // advance the character by 1 since going into this state, it start with "
+		if (str[endIndex] == 34 && str[endIndex-1] != 92) { // case when it is quote and the previous character is not except character
+			std::string returnValue = str.substr(startIndex+1, endIndex-startIndex-1); // copy the string, exclude the 2 quotes on 2 sides
+			// trim the string
+			returnValue.erase(0, returnValue.find_first_not_of(" "));
+			returnValue.erase(returnValue.find_last_not_of(" ")+1);
+			startIndex = endIndex;
+			return returnValue;
+		}
+	}
+	throw std::runtime_error("missing the termination '\"' for the string data start at " + std::to_string(startIndex));
+}
+
+double Parse::getNumber(int& startIndex, const std::string& str){
 	std::string tempVal;
 	for (int endIndex = startIndex; endIndex < str.length(); endIndex++){
 		switch (str[endIndex]) {
-			case ',': // cases that terminate the loop
+			case ',': // cases that the current character signify the end of the variable
 			case ']':
 			case '}':
 				tempVal = str.substr(startIndex, endIndex - startIndex);
-				startIndex = endIndex;
+				startIndex = endIndex-1;
 				return std::stod(tempVal);
 				break;
-			case '0':
+			case '0': // cases that the current character is a number
 			case '1':
 			case '2':
 			case '3':
@@ -217,7 +235,7 @@ double getNumber(int& startIndex, const std::string& str){
 			case '9':
 			case '.':
 				break;
-			default:
+			default: // case that the current character is not a number or terminate character
 				throw std::runtime_error("not a number at character " + std::to_string(endIndex));
 				break;
 		}
@@ -229,7 +247,7 @@ double getNumber(int& startIndex, const std::string& str){
 /**
 support method to get the boolean value of key-value pair
 */
-bool getBoolean(int& startIndex, const std::string& str){
+bool Parse::getBoolean(int& startIndex, const std::string& str){
 	std::string evaluateStr = str.substr(startIndex, 4);
 	startIndex+=4;
 	if (evaluateStr == "true") return 1;
@@ -240,34 +258,65 @@ bool getBoolean(int& startIndex, const std::string& str){
 /**
 support function to get object value
 */
-Object getObject(int& startIndex, const std::string& str){
+Object Parse::getObject(int& startIndex, const std::string& str){
 	Object obj = *(new Object()); // dynatmically allocate object
+	Primitive* primitive;
+	std::string key = "";
 	int openBrace = 0; // count the braces
 	for (int endIndex = startIndex; endIndex < str.length(); endIndex++){
 		switch(str[endIndex]){
-			case "{":
-				openBrace++;
-				endIndex++;
-				std::string key = getKey(endIndex, str);
-				
+			case '{': // either this is the very beginning or start of a Object value
+				openBrace++; // increase the count to detect when to stop
+				if (key.empty()){ // if the key is empty then it is the begining of the Object
+					endIndex++; // skip the '{' char
+					key = getKey(endIndex, str);
+				} else { // if key is recoreded then it is begining of value
+					primitive = new Primitive(getObject(endIndex, str));
+					obj.set(key, primitive);
+					key = "";
+				}
 				break;
-			case "}":
+			case '}': // possibly the terminate character of this function
 				openBrace--;
-				if (openBrace == 0) return obj;
+				if (openBrace == 0){ // it is the terminate character of this function
+					startIndex = endIndex;
+					return obj;
+				}
+				else if (openBrace < 0) // excessive amount of '}' happened
+					throw std::runtime_error("incorrect } at " + std::to_string(endIndex));
 				break;
-
+			case '[': // start of Array
+				break;
+			case 't': // possible start of bolean true value
+			case 'f': // possible start of bolean false value
+				primitive = new Primitive(getBoolean(endIndex, str));
+				obj.set(key, primitive);
+				break;
+			case '"': // possible start of of string value
+				primitive = new Primitive(getString(endIndex,str));
+				obj.set(key, primitive);
+				break;
+			case ',': // separator between each key:value pair
+				key = getKey(endIndex, str);
+				break;
+			case ' ': // ignore the space character
+				break;
+			default: // character is out of line
+				throw std::runtime_error("invalid character at " + std::to_string(endIndex));
+				break;
 		}
 	}
+	throw std::runtime_error("Missing terminate character ");
 }
 
 /**
 support function to get array returnValue
 */
 Array getArray(int& startIndex, const std::string& str){
-
+	Array* arr = new Array();
+	return *arr;
 }
 
-Object Object::parse(const std::string& str) {
-
-	return *(new Object());
+Array::Array(){
+	vec = new std::vector<Primitive*>();
 }
