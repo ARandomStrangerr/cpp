@@ -1,7 +1,4 @@
 #include "JSON.h"
-#include <stdexcept>
-#include <string>
-#include <vector>
 
 Primitive::Primitive(std::string str){
 	this->str = *(new std::string(str));
@@ -42,6 +39,7 @@ Primitive::Primitive(Object* objPtr){
 	this->objPtr = objPtr;
 	this->type = Type::OBJECT;
 }
+
 Primitive::Primitive(Array arr){
 	this->arrPtr = &arr;
 	this->type = Type::ARRAY;
@@ -56,6 +54,7 @@ Primitive::~Primitive(){
 	// switch (type) {
 	// 	case Type::STRING:
 	// 		delete &str;
+	// 		str = nullptr;
 	// 		break;
 	// 	case Type::NUMBER:
 	// 		delete &num;
@@ -65,9 +64,11 @@ Primitive::~Primitive(){
 	// 		break;
 	// 	case Type::ARRAY:
 	// 		delete arrPtr;
+	// 		arrPtr = nullptr;
 	// 		break;
 	// 	case Type::OBJECT:
 	// 		delete objPtr;
+	// 		objPtr = nullptr;
 	// 		break;
 	// }
 }
@@ -124,7 +125,7 @@ Object::Object(){
 }
 
 Primitive Object::get(std::string key){
-	if (map.find(key) != map.end()) return map[key];
+	if (map.find(key) != map.end()) return *map[key];
 	throw std::runtime_error("the key does not exists");
 }
 
@@ -260,7 +261,6 @@ support function to get object value
 */
 Object Parse::getObject(int& startIndex, const std::string& str){
 	Object obj = *(new Object()); // dynatmically allocate object
-	Primitive* primitive;
 	std::string key = "";
 	int openBrace = 0; // count the braces
 	for (int endIndex = startIndex; endIndex < str.length(); endIndex++){
@@ -271,8 +271,7 @@ Object Parse::getObject(int& startIndex, const std::string& str){
 					endIndex++; // skip the '{' char
 					key = getKey(endIndex, str);
 				} else { // if key is recoreded then it is begining of value
-					primitive = new Primitive(getObject(endIndex, str));
-					obj.set(key, primitive);
+					obj.set(key, getObject(endIndex, str));
 					key = "";
 				}
 				break;
@@ -289,12 +288,10 @@ Object Parse::getObject(int& startIndex, const std::string& str){
 				break;
 			case 't': // possible start of bolean true value
 			case 'f': // possible start of bolean false value
-				primitive = new Primitive(getBoolean(endIndex, str));
-				obj.set(key, primitive);
+				obj.set(key, getBoolean(endIndex, str));
 				break;
 			case '"': // possible start of of string value
-				primitive = new Primitive(getString(endIndex,str));
-				obj.set(key, primitive);
+				obj.set(key, getString(endIndex,str));
 				break;
 			case ',': // separator between each key:value pair
 				key = getKey(endIndex, str);
@@ -314,6 +311,7 @@ support function to get array returnValue
 */
 Array getArray(int& startIndex, const std::string& str){
 	Array* arr = new Array();
+
 	return *arr;
 }
 

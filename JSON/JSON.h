@@ -7,13 +7,12 @@
 #include <cstdlib>
 #include <regex>
 
-enum class Type;
 class Parse;
 class Primitive;
 class Object;
 class Array;
 
-enum class Type{STRING, NUMBER, BOOLEAN, ARRAY, OBJECT};
+enum Type {STRING, NUMBER, BOOLEAN, ARRAY, OBJECT};
 
 class Parse {
 	public:
@@ -55,7 +54,6 @@ class Parse {
 		*/
 		static Object getObject(int&, const std::string&);
 		static Array getArray(int&, const std::string&);
-
 	friend class Primitive;
 	friend class Object;
 	friend class Array;
@@ -67,12 +65,12 @@ it design in a way such that when the original given variable is deleted, the va
 */
 class Primitive{
 	private:
-		Type type;
 		std::string str;
 		double num;
 		bool boo;
 		Object* objPtr;
 		Array* arrPtr;
+		Type type;
 	public:
 		/**
 		@brief
@@ -204,6 +202,7 @@ class Primitive{
 		Array getArr();
 
 		friend std::ostream& operator<< (std::ostream&, const Primitive&);
+		friend class Parse;
 };
 
 class Object{
@@ -216,7 +215,7 @@ class Object{
 		just create a map here
 		*/
 		Object();
-		~Object();
+		//~Object();
 		/**
 		@brief
 		go through each element in the map, release the memory.
