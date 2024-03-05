@@ -75,48 +75,57 @@ class Primitive{
 		Array* arrPtr;
 	public:
 		/**
+		@brief
 		constructor for a string.
 		this class dynamically allocate memory a copy of the given string
 		*/
 		Primitive(std::string);
 
 		/**
+		@brief
 		constructor for a string pointer.
 		this class hold a copy of the deference of this string
 	 	*/
 		Primitive(std::string*);
 
 		/**
+		@brief
 		constructor for a number.
 		directly set this class number to the given number because the value of number of this class retains when the given number is expired
 	 	*/
 		Primitive(double);
 
 		/**
+		@brief
 	 	constructor poitner for a number.
 		this class hold copy value of the given pointer because the value of number of this class is dangling when the given poitner is deleted
 		*/
 		Primitive(double*);
 
 		/**
+		@brief
 		constructor for a boolean.
 		simlar to double constructor
 	 	*/
 		Primitive(bool);
 
 		/**
+		@brief
 		constructor for a boolean pointer.
 		simlar to double pointer constructor
 	 	*/
 		Primitive(bool*);
 
 		/**
+		@brief
 		constructor for an object.
 		address-of given object then set it to this object poitner.
 		the given object must be dinamically allocated because when it is release, this object poitner points to nothing.
 	 	*/
 		Primitive(Object);
+
 		/**
+		@brief
 		constructor for an object.
 		this poitner points to the given object poitner.
 		the given object must be dinamically allocated because when it is release, this object poitner points to nothing.
@@ -124,19 +133,23 @@ class Primitive{
 		Primitive(Object*);
 
 		/**
+		@brief
 		constructor for an array.
 		similar to object constructor
 	 	*/
 		Primitive(Array);
 
 		/**
+		@brief
 		constructor for an array.
 		similar to object poitner constructor
 	 	*/
 		Primitive(Array*);
 
 		/**
-	 	destructor
+		@brief
+	 	destructor.
+		call the destructor of the data that this hold
 		*/
 		~Primitive();
 
@@ -197,15 +210,87 @@ class Object{
 	private:
 		std::unordered_map<std::string, Primitive*> map;
 	public:
+		/**
+		@brief
+		defalut constructor.
+		just create a map here
+		*/
 		Object();
-		Object(std::string);
+		~Object();
+		/**
+		@brief
+		go through each element in the map, release the memory.
+		empty the map.
+		then set the poiner of the map to nulltpr
+		*/
 		Primitive get(std::string);
+
+		/**
+		@brief
+		remove an element out of the map then de-allocate the element
+		@param
+		std::string name of the key
+		*/
 		void remove(std::string);
+
+		/**
+		@brief
+		add a string element into the map
+		if the key is already allocated with an element, the allocated element will be de-allocate
+		@params
+		std::string key
+		std::string value
+		*/
 		void set(std::string, std::string);
+
+		/**
+		@brief
+		add a number element into the map
+		if the key is already allocated with an element, the allocated element will be de-allocate
+		@params
+		std::string key
+		double value
+		*/
 		void set(std::string, double);
+
+		/**
+		@brief
+		add a boolean element into the map
+		if the key is already allocated with an element, the allocated element will be de-allocate
+		@params
+		std::string key
+		bool value
+		*/
 		void set(std::string, bool);
+
+		/**
+		@brief
+		add an object element into the map
+		if the key is already allocated with an element, the allocated element will be de-allocate
+		@params
+		std::string key
+		Object value
+		*/
 		void set(std::string, Object);
+
+		/**
+		@brief
+		add an Array element into the map
+		if the key is already allocated with an element, the allocated element will be de-allocate
+		@params
+		std::string key
+		Array value
+		*/
 		void set(std::string, Array);
+
+		/**
+		@brief
+		parse a string to an object
+		@param
+		const std::string& the string to parse
+		@error
+		std::runtime_error when a character is out of place, for more information, read Parse class and each of its function.
+		*/
 		static Object parse(const std::string&);
 		friend std::ostream& operator<< (std::ostream&, const Object&);
 };
@@ -215,8 +300,9 @@ class Array{
 		std::vector<Primitive*>* vec;
 	public:
 		Array();
-		Array(std::string);
-		Primitive* getPtr(int);
-		Primitive* deletePtr(int);
+		Primitive get(int);
+		void insert(std::string);
+		void remove(int);
 		void setPtr(int, Primitive*);
+		Array parse(const std::string&);
 };
