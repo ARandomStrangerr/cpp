@@ -362,3 +362,28 @@ Array getArray(int& startIndex, const std::string& str){
 Array::Array(){
 	vec = new std::vector<Primitive*>();
 }
+
+void Array::insert(std::string str){
+	Primitive* primitive = new Primitive(str);
+	this->vec->push_back(primitive);
+}
+
+void Array::insert(double num){
+	Primitive* primitive = new Primitive(num);
+	this->vec->push_back(primitive);
+}
+
+void Array::insert(bool boolean){
+	Primitive* primitive = new Primitive(boolean);
+	this->vec->push_back(primitive);
+}
+
+void Array::insert(Object obj){
+	Primitive* primitive = new Primitive(obj);
+	this->vec->push_back(primitive);
+}
+
+void Array::insert(Array arr){
+	Primitive* primitive = new Primitive(arr);
+	this->vec->push_back(primitive);
+}
