@@ -301,6 +301,10 @@ class Array{
 		Array();
 		Primitive get(int);
 		void insert(std::string);
+		void insert(double);
+		void insert(bool);
+		void insert(Object);
+		void insert(Array);
 		void remove(int);
 		void setPtr(int, Primitive*);
 		Array parse(const std::string&);
