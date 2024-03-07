@@ -1,4 +1,6 @@
 #include "JSON.h"
+#include <stdexcept>
+#include <string>
 
 Primitive::Primitive(std::string str){
 	this->str = *(new std::string(str));
@@ -234,7 +236,7 @@ double Parse::getNumber(int& startIndex, const std::string& str){
 			case '7':
 			case '8':
 			case '9':
-			case '.':
+			case '.': // this can be here due to the when this function is called by getObject or getArray, the first character is a number already
 				break;
 			default: // case that the current character is not a number or terminate character
 				throw std::runtime_error("not a number at character " + std::to_string(endIndex));
@@ -249,18 +251,29 @@ double Parse::getNumber(int& startIndex, const std::string& str){
 support method to get the boolean value of key-value pair
 */
 bool Parse::getBoolean(int& startIndex, const std::string& str){
-	std::string evaluateStr = str.substr(startIndex, 4);
-	startIndex+=4;
-	if (evaluateStr == "true") return 1;
-	else if (evaluateStr == "fase") return 0;
-	else throw std::runtime_error("invalid value at " + std::to_string(startIndex - 4));
+	switch (str[startIndex]){
+		case 'f': // case start of false
+			if (str.substr(startIndex, 5) == "false"){
+				startIndex+=5;
+				return 0;
+			}
+			throw std::runtime_error("incorrect state at " + std::to_string(startIndex));
+		case 't': // case start of true
+			if (str.substr(startIndex, 4) == "true"){
+				startIndex+=4;
+				return 1;
+			}
+			throw std::runtime_error("incorrect state at " + std::to_string(startIndex));
+	}
+	return -1; // this code can never be reached
 }
 
 /**
 support function to get object value
+the open brace should be handle differently.
 */
 Object Parse::getObject(int& startIndex, const std::string& str){
-	Object obj = *(new Object()); // dynatmically allocate object
+	Object obj = *(new Object()); // dynamically allocate object
 	std::string key = "";
 	int openBrace = 0; // count the braces
 	for (int endIndex = startIndex; endIndex < str.length(); endIndex++){
@@ -298,6 +311,18 @@ Object Parse::getObject(int& startIndex, const std::string& str){
 				break;
 			case ' ': // ignore the space character
 				break;
+			case '0': // case that it is a number
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+				obj.set(key, getNumber(endIndex, str));
+				break;
 			default: // character is out of line
 				throw std::runtime_error("invalid character at " + std::to_string(endIndex));
 				break;
@@ -310,9 +335,28 @@ Object Parse::getObject(int& startIndex, const std::string& str){
 support function to get array returnValue
 */
 Array getArray(int& startIndex, const std::string& str){
-	Array* arr = new Array();
+	Array arr = *(new Array());
+	int openBrace = 0;
+	for (int endIndex = startIndex; endIndex < str.length(); endIndex++){
+		switch(str[endIndex]){
+			case '[': // either it is the very begining or an array value
+				openBrace++; // increase count to know when to stop
+				if (openBrace) // when openBrace != 0, it is the start of a new array value
 
-	return *arr;
+				break;
+			case ']':
+				openBrace--;
+				if (!openBrace) {
+					startIndex = endIndex;
+					return arr;
+				}
+				break;
+			case '"': //
+				arr.insert(Parse::getString(endIndex, str));
+				break;
+		}
+	}
+	throw std::runtime_error("Missing terminate character");
 }
 
 Array::Array(){
