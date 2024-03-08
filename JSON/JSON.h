@@ -19,12 +19,12 @@ class Parse {
 		/**
 		@brief:
 		get the key of the key:value pair.
-		parse the string until it see ':'
+		parse the string until it see ':'.
 		clean up the string by delete ' ' and quote at 2 ends
 		check if the string is fit to be variable by regex
 		@params:
-		int& pass by reference of the begin index to start parsing
-		std::string the string to parse
+		int& pass-by-reference of the begin index to start parsing.
+		const std::string& the string to parse
 		@return:
 		std::string a non-dynamicall-allocated string represent key.
 		@error:
@@ -33,10 +33,51 @@ class Parse {
 		*/
 		static std::string getKey(int&, const std::string&);
 
+		/**
+		@breif:
+		get the value type string of the key:value pair.
+		parse the string until it see '"' (close quote).
+		to enter this function from getObject or getArray, the character must be '"'; therefore, there is no need to verify the open quote
+		@params:
+		int& pass-by-reference of the begin index to start parsing.
+		const std::string& the string to parse, pass-by-reference help with the passing performnace without the need of copy the string (no auxilary space, copy string)
+		@return:
+		std::string a non-dynamically-allocated string represent string value.
+		@error:
+		std::runtime_error when the terminate character (close quote) can not be found.
+		*/
 		static std::string getString(int&, const std::string&);
 
+		/**
+		@brief:
+		get the value type number of the key:value pair.
+		get the string until it see terminate character: ',' '}' ']' ' '
+		convert the string to number then return it
+		to enter this function from getObject or getArray, the character must be a number; therefore ther is no situation where the start of the number is a dot (i.e. .0001)
+		@params:
+		int& pass-by-reference of the begin index to start parsing.
+		const std::string& the string to parse, pass-by-reference help with the passing performnace without the need of copy the string (no auxilary space, copy string)
+		@return:
+		double a non-dynamically-allocated number represent number value.
+		@error:
+		std::runtime_error when the terminate character (close quote) can not be found.
+		std::runtime_error when the current character is not a number or terminate character
+		*/
 		static double getNumber(int&, const std::string&);
 
+		/**
+		@brief:
+		get the value type boolean of the key:value pair.
+		if the starting position start with 't', advance 4 character and see if it is "true".
+		if the starting position start with 'f', advance 5 character and see if it is "false".
+		@params:
+		int& pass-by-reference of the begin index to start parsing.
+		const std::string& the string to parse, pass-by-reference help with the passing performnace without the need of copy the string (no auxilary space, copy string)
+		@return:
+		bool a non-dynamically-allocated boolean represent boolean value.
+		@error:
+		std::runtime_error when the parse string is not "true" or "false"
+		*/
 		static bool getBoolean(int&, const std::string&);
 
 		/**

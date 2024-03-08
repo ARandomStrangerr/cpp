@@ -192,6 +192,7 @@ std::string Parse::getKey(int& startIndex, const std::string& str){
 			if (returnValue[0] == '"') returnValue.erase(0,1);
 			if (returnValue[returnValue.length() -1] == '"') returnValue.erase(returnValue.length()-1);
 			// regex checking the syntax of the variable name
+			std::cout << returnValue << std::endl;
 			std::regex pattern("^[a-zA-Z_][a-zA-Z0-9_]*$");
 			if (!std::regex_search(returnValue, pattern)) throw std::runtime_error("variable name is invalid at " + std::to_string(startIndex));
 			startIndex = endIndex;
@@ -247,25 +248,14 @@ double Parse::getNumber(int& startIndex, const std::string& str){
 	return 0;
 }
 
-/**
-support method to get the boolean value of key-value pair
-*/
 bool Parse::getBoolean(int& startIndex, const std::string& str){
-	switch (str[startIndex]){
-		case 'f': // case start of false
-			if (str.substr(startIndex, 5) == "false"){
-				startIndex+=5;
-				return 0;
-			}
-			throw std::runtime_error("incorrect state at " + std::to_string(startIndex));
-		case 't': // case start of true
-			if (str.substr(startIndex, 4) == "true"){
-				startIndex+=4;
-				return 1;
-			}
-			throw std::runtime_error("incorrect state at " + std::to_string(startIndex));
-	}
-	return -1; // this code can never be reached
+	if (str.substr(startIndex, 5) == "false") {
+		startIndex+=4;
+		return 0;
+	} else if (str.substr(startIndex, 4) == "true") {
+		startIndex+=3;
+		return 1;
+	} else throw std::runtime_error("Incorrect tokken of possible boolean value at: " + std::to_string(startIndex));
 }
 
 /**
@@ -273,40 +263,40 @@ support function to get object value
 the open brace should be handle differently.
 */
 Object Parse::getObject(int& startIndex, const std::string& str){
+	int endIndex = startIndex+1;
+	std::string key = getKey(endIndex, str); // the start of an Object should be a key.
+	endIndex++; // after above funciton, it stops at ':'
 	Object obj = *(new Object()); // dynamically allocate object
-	std::string key = "";
-	int openBrace = 0; // count the braces
-	for (int endIndex = startIndex; endIndex < str.length(); endIndex++){
-		switch(str[endIndex]){
-			case '{': // either this is the very beginning or start of a Object value
-				openBrace++; // increase the count to detect when to stop
-				if (key.empty()){ // if the key is empty then it is the begining of the Object
-					endIndex++; // skip the '{' char
-					key = getKey(endIndex, str);
-				} else { // if key is recoreded then it is begining of value
-					obj.set(key, getObject(endIndex, str));
-					key = "";
-				}
+	for (; endIndex < str.length(); endIndex++) { // now the string should start at ':'
+		switch(str[endIndex]) {
+			case '{': // start of a Object value
+				if (key.empty()) throw std::runtime_error("Missing key at: " + std::to_string(endIndex));
+				obj.set(key, Parse::getObject(endIndex, str));
+				key = "";
 				break;
-			case '}': // possibly the terminate character of this function
-				openBrace--;
-				if (openBrace == 0){ // it is the terminate character of this function
-					startIndex = endIndex;
-					return obj;
-				}
-				else if (openBrace < 0) // excessive amount of '}' happened
-					throw std::runtime_error("incorrect } at " + std::to_string(endIndex));
+			case '}': // terminate character of this function
+				if (key.empty()) return obj;
+				throw std::runtime_error("Missing value at: " + std::to_string(endIndex));
 				break;
 			case '[': // start of Array
+				if (key.empty()) throw std::runtime_error("Incorrect tokken at: " + std::to_string(endIndex));
+				obj.set(key, Parse::getArray(endIndex, str));
+				key = "";
 				break;
 			case 't': // possible start of bolean true value
 			case 'f': // possible start of bolean false value
+				if (key.empty()) throw std::runtime_error("Incorrect tokken at: " + std::to_string(endIndex));
 				obj.set(key, getBoolean(endIndex, str));
+				key = "";
 				break;
 			case '"': // possible start of of string value
+				if (key.empty()) throw std::runtime_error("Incorrect tokken at: " + std::to_string(endIndex));
 				obj.set(key, getString(endIndex,str));
+				key = "";
 				break;
 			case ',': // separator between each key:value pair
+				if (!key.empty()) throw std::runtime_error("Incorrect tokken at: " + std::to_string(endIndex));
+				endIndex++; // the current character is ',' the get key will not process this.
 				key = getKey(endIndex, str);
 				break;
 			case ' ': // ignore the space character
@@ -321,9 +311,11 @@ Object Parse::getObject(int& startIndex, const std::string& str){
 			case '7':
 			case '8':
 			case '9':
-				obj.set(key, getNumber(endIndex, str));
+				if (key.empty()) throw std::runtime_error("Incorrect tokken at: " + std::to_string(endIndex));
+				obj.set(key, Parse::getNumber(endIndex, str));
+				key = "";
 				break;
-			default: // character is out of line
+			default: // character is invalid
 				throw std::runtime_error("invalid character at " + std::to_string(endIndex));
 				break;
 		}
@@ -331,29 +323,60 @@ Object Parse::getObject(int& startIndex, const std::string& str){
 	throw std::runtime_error("Missing terminate character ");
 }
 
-/**
-support function to get array returnValue
-*/
-Array getArray(int& startIndex, const std::string& str){
+Array Parse::getArray(int& startIndex, const std::string& str){
+	bool isFoundValue = 0; // checking if a value is found
 	Array arr = *(new Array());
-	int openBrace = 0;
-	for (int endIndex = startIndex; endIndex < str.length(); endIndex++){
+	for (int endIndex = startIndex+1; endIndex < str.length(); endIndex++){ // advance the character by 1 since to enter this stage, it start with '['
 		switch(str[endIndex]){
-			case '[': // either it is the very begining or an array value
-				openBrace++; // increase count to know when to stop
-				if (openBrace) // when openBrace != 0, it is the start of a new array value
-
+			case '[': // case of a nested array
+				if (isFoundValue) throw std::runtime_error("Missing separate character at " + std::to_string(endIndex)); // found 2 consecutive values without a separate character
+				arr.insert(Parse::getArray(endIndex,str));
+				isFoundValue = 1; // value is found
 				break;
-			case ']':
-				openBrace--;
-				if (!openBrace) {
+			case ']': // end of this array
+				if (isFoundValue) {
 					startIndex = endIndex;
-					return arr;
+					return arr; // teminate charcater should be meet before a value
 				}
+				else throw std::runtime_error("Missing value before terminate character at " + std::to_string(endIndex));
 				break;
-			case '"': //
+			case '{': // case of an object
+				if (isFoundValue) throw std::runtime_error("Missing separate character at " + std::to_string(endIndex)); // found 2 consecutive values without a separate character
+				arr.insert(Parse::getArray(endIndex, str));
+				isFoundValue = 1;
+				break;
+			case '"': // start of a string
+				if (isFoundValue) throw std::runtime_error("Missing separate character at " + std::to_string(endIndex)); // found 2 consecutive values without a separate character
 				arr.insert(Parse::getString(endIndex, str));
+				isFoundValue = 1; // value is found
 				break;
+			case 't': // case that it is a boolean
+			case 'f':
+				if (isFoundValue) throw std::runtime_error("Missing separate character at " + std::to_string(endIndex)); // found 2 consecutive values without a separate character
+				arr.insert(Parse::getBoolean(endIndex, str));
+				isFoundValue = 1; // value is found
+				break;
+			case '0': // case that it is a number
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+				if (isFoundValue) throw std::runtime_error("Missing separate character at " + std::to_string(endIndex)); // found 2 consecutive values without a separate character
+				arr.insert(Parse::getNumber(endIndex, str));
+				isFoundValue = 1; // value is found
+				break;
+			case ' ': // ignore space character
+				break;
+			case ',': // case of separate character
+				if (isFoundValue) isFoundValue = 0; // case that the value
+				else throw std::runtime_error("No value is found before a comma" + std::to_string(endIndex));
+			default: // any other character is an error
+				throw std::runtime_error("unknwon tokken " + std::to_string(endIndex));
 		}
 	}
 	throw std::runtime_error("Missing terminate character");
