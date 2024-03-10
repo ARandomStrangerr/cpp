@@ -83,18 +83,17 @@ class Parse {
 		/**
 		@breif:
 		get the Object represent value of key:value pair
-		parse until pair '{' and '}' are equal
 		@params:
 		int& pass by reference of the begin index to start parsing
 		std::string the string to parse
 		@return:
-		Object dynaically-allocated object
+		Object return-by-reference a dynaically-allocated object, the capture variable of this function MUST BE A POINTER
 		@error:
 		std::runtime_error when it is the end of the given string and pair '{' and '}' are not equal
 		std::runtime_error when there is a character out of place
 		*/
-		static Object getObject(int&, const std::string&);
-		static Array getArray(int&, const std::string&);
+		static Object& getObject(int&, const std::string&);
+		static Array& getArray(int&, const std::string&);
 	friend class Primitive;
 	friend class Object;
 	friend class Array;
@@ -106,7 +105,7 @@ it design in a way such that when the original given variable is deleted, the va
 */
 class Primitive{
 	private:
-		std::string str;
+		std::string* strPtr;
 		double num;
 		bool boo;
 		Object* objPtr;
@@ -118,50 +117,50 @@ class Primitive{
 		constructor for a string.
 		this class dynamically allocate memory a copy of the given string
 		*/
-		Primitive(std::string);
+		Primitive(const std::string);
 
 		/**
 		@brief
 		constructor for a string pointer.
-		this class hold a copy of the deference of this string
+		this class dynamically allocate memory hold a copy of the deference of this string
 	 	*/
-		Primitive(std::string*);
+		Primitive(const std::string*);
 
 		/**
 		@brief
 		constructor for a number.
 		directly set this class number to the given number because the value of number of this class retains when the given number is expired
 	 	*/
-		Primitive(double);
+		Primitive(const double);
 
 		/**
 		@brief
 	 	constructor poitner for a number.
 		this class hold copy value of the given pointer because the value of number of this class is dangling when the given poitner is deleted
 		*/
-		Primitive(double*);
+		Primitive(const double*);
 
 		/**
 		@brief
 		constructor for a boolean.
 		simlar to double constructor
 	 	*/
-		Primitive(bool);
+		Primitive(const bool);
 
 		/**
 		@brief
 		constructor for a boolean pointer.
 		simlar to double pointer constructor
 	 	*/
-		Primitive(bool*);
+		Primitive(const bool*);
 
 		/**
 		@brief
 		constructor for an object.
-		address-of given object then set it to this object poitner.
+		address-of given object then set it to this object poitner; therefore, the param must be pass-by-reference
 		the given object must be dinamically allocated because when it is release, this object poitner points to nothing.
 	 	*/
-		Primitive(Object);
+		Primitive(Object&);
 
 		/**
 		@brief
@@ -176,7 +175,7 @@ class Primitive{
 		constructor for an array.
 		similar to object constructor
 	 	*/
-		Primitive(Array);
+		Primitive(Array&);
 
 		/**
 		@brief
@@ -248,15 +247,17 @@ class Primitive{
 
 class Object{
 	private:
-		std::unordered_map<std::string, Primitive*> map;
 	public:
+	std::unordered_map<std::string, Primitive*>* map;
 		/**
 		@brief
 		defalut constructor.
 		just create a map here
 		*/
 		Object();
-		//~Object();
+
+		~Object();
+
 		/**
 		@brief
 		go through each element in the map, release the memory.
@@ -311,7 +312,7 @@ class Object{
 		std::string key
 		Object value
 		*/
-		void set(std::string, Object);
+		void set(std::string, Object&);
 
 		/**
 		@brief
@@ -321,7 +322,7 @@ class Object{
 		std::string key
 		Array value
 		*/
-		void set(std::string, Array);
+		void set(std::string, Array&);
 
 		/**
 		@brief
@@ -331,7 +332,7 @@ class Object{
 		@error
 		std::runtime_error when a character is out of place, for more information, read Parse class and each of its function.
 		*/
-		static Object parse(const std::string&);
+		static Object& parse(const std::string&);
 		friend std::ostream& operator<< (std::ostream&, const Object&);
 };
 
@@ -340,6 +341,7 @@ class Array{
 		std::vector<Primitive*>* vec;
 	public:
 		Array();
+		~Array();
 		Primitive get(int);
 		void insert(std::string);
 		void insert(double);
@@ -348,5 +350,6 @@ class Array{
 		void insert(Array);
 		void remove(int);
 		void setPtr(int, Primitive*);
-		Array parse(const std::string&);
+		static Array& parse(const std::string&);
+		friend std::ostream& operator<< (std::ostream&, const Array&);
 };
