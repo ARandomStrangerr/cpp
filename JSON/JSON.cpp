@@ -53,26 +53,26 @@ Primitive::Primitive(Array* arrPtr){
 }
 
 Primitive::~Primitive(){
-	// switch (type) {
-	// 	case Type::STRING:
-	// 		delete &str;
-	// 		str = nullptr;
-	// 		break;
-	// 	case Type::NUMBER:
-	// 		delete &num;
-	// 		break;
-	// 	case Type::BOOLEAN:
-	// 		delete &boo;
-	// 		break;
-	// 	case Type::ARRAY:
-	// 		delete arrPtr;
-	// 		arrPtr = nullptr;
-	// 		break;
-	// 	case Type::OBJECT:
-	// 		delete objPtr;
-	// 		objPtr = nullptr;
-	// 		break;
-	// }
+	switch (type) {
+		case Type::STRING:
+			delete &str;
+			str = nullptr;
+			break;
+		case Type::NUMBER:
+			delete &num;
+			break;
+		case Type::BOOLEAN:
+			delete &boo;
+			break;
+		case Type::ARRAY:
+			delete arrPtr;
+			arrPtr = nullptr;
+			break;
+		case Type::OBJECT:
+			delete objPtr;
+			objPtr = nullptr;
+			break;
+	}
 }
 
 std::string Primitive::getStr(){
@@ -179,7 +179,8 @@ std::ostream& operator<< (std::ostream& os, const Object& obj){
 
 /**
 support method to get the key of key-value pair.
-the return value is not allocated dynamically
+the return value is not allocated dynamically.
+parse the string until see ':'
 */
 std::string Parse::getKey(int& startIndex, const std::string& str){
 	for (int endIndex = startIndex; endIndex < str.length(); endIndex++){
@@ -259,8 +260,30 @@ bool Parse::getBoolean(int& startIndex, const std::string& str){
 }
 
 /**
-support function to get object value
-the open brace should be handle differently.
+process character by character.
+this ensure that this algorithm is running in O(n)
+to run this funciton, it must start with '{', hence the first character is skip.
+then right after that, it must be follow by a key.
+character:
+space character - ignore
+double quote - string value
+number - number value
+open curly brace - object value
+close culty brace - termination of this function
+open square brace - array value
+character 't' or 'f' - boolean value
+character comma - separate character
+reason:
+the key always follow by ':' and then value.
+the key and ':' is handled by Parse::getKey(int& startIndex, const std::string& str); hence, parse value, check if key exists. after parse value, the key should be reset.
+when see ',' it must be follow by a key; hence call Parse::getKey(int& startIndex, const std::string& str)
+when the case 2 commas consecutive, (, , "key" : "value") the Parse::getKey(int& startIndex, const std::string& str) function will yield error since it is not suitable to be variable name
+the case when there is no ':', ("key" "value"), the Parse::getKey(int& startIndex, const std::string& str) will yeild error since ':' is the terminate character of that function
+(it might be in efficient since it make the Parse::getKey(int& startIndex, const std::string& str) to O(n))
+the case where there is no value, ("key": ,) then the key will not be reset, when it see a ',' error will be throw
+the case where there is no key, (, :"value"), Parse::getKey(int& startIndex, const std::string& str) will throw an error that it is not suitable to be variable name.
+the case where
+any other character will throw an error, 2 colon ("key"::"value")
 */
 Object Parse::getObject(int& startIndex, const std::string& str){
 	int endIndex = startIndex+1;
@@ -323,6 +346,18 @@ Object Parse::getObject(int& startIndex, const std::string& str){
 	throw std::runtime_error("Missing terminate character ");
 }
 
+/**
+parse array is way easier compare to Object relation
+isFoundValue to check that value is found, prevent error when 2 comma in consecutive or comma righ before ']'
+when found any following character, isFoundValue = true -> throw an error
+when '"' parse string
+when number, parse number.
+when 't' or 'f', parse boolean
+when '{' parse Object
+when '[' parse Array
+when ']' it is the terminate of this function and
+when ',' isFoundValue set to false. if isFoundValue = false, then two commas are consecutive
+*/
 Array Parse::getArray(int& startIndex, const std::string& str){
 	bool isFoundValue = 0; // checking if a value is found
 	Array arr = *(new Array());
@@ -409,4 +444,17 @@ void Array::insert(Object obj){
 void Array::insert(Array arr){
 	Primitive* primitive = new Primitive(arr);
 	this->vec->push_back(primitive);
+}
+
+
+Array Array::parse(const std::string& str){
+	int startIndex = 0;
+	return Parse::getArray(startIndex, str);
+}
+
+Array::~Array(){
+	for(auto item : *(this->vec)) delete item;
+	this->vec->clear();
+	delete vec;
+	vec = nullptr;
 }
