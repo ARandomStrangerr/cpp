@@ -1,38 +1,36 @@
 #include "JSON.h"
-#include <stdexcept>
-#include <string>
 
-Primitive::Primitive(std::string str){
-	this->str = *(new std::string(str));
+Primitive::Primitive(const std::string str){
+	this->strPtr = new std::string(str);
 	this->type = Type::STRING;
 }
 
-Primitive::Primitive(std::string* strPtr){
-	this->str = *(new std::string(*strPtr));
+Primitive::Primitive(const std::string* strPtr){
+	this->strPtr = new std::string(*strPtr);
 	this->type = Type::STRING;
 }
 
-Primitive::Primitive(double num){
+Primitive::Primitive(const double num){
 	this->num = num;
 	this->type = Type::NUMBER;
 }
 
-Primitive::Primitive(double* numPtr){
+Primitive::Primitive(const double* numPtr){
 	this->num = *(new double(*numPtr));
 	this->type = Type::NUMBER;
 }
 
-Primitive::Primitive(bool boo){
+Primitive::Primitive(const bool boo){
 	this->boo = boo;
 	this->type = Type::BOOLEAN;
 }
 
-Primitive::Primitive(bool* booPtr){
+Primitive::Primitive(const bool* booPtr){
 	this->boo = *(new bool(*booPtr));
 	this->type = Type::BOOLEAN;
 }
 
-Primitive::Primitive(Object obj){
+Primitive::Primitive(Object& obj){
 	this->objPtr = &obj;
 	this->type = Type::OBJECT;
 }
@@ -42,7 +40,7 @@ Primitive::Primitive(Object* objPtr){
 	this->type = Type::OBJECT;
 }
 
-Primitive::Primitive(Array arr){
+Primitive::Primitive(Array& arr){
 	this->arrPtr = &arr;
 	this->type = Type::ARRAY;
 }
@@ -55,14 +53,11 @@ Primitive::Primitive(Array* arrPtr){
 Primitive::~Primitive(){
 	switch (type) {
 		case Type::STRING:
-			delete &str;
-			str = nullptr;
+			delete strPtr;
+			strPtr = nullptr;
 			break;
 		case Type::NUMBER:
-			delete &num;
-			break;
 		case Type::BOOLEAN:
-			delete &boo;
 			break;
 		case Type::ARRAY:
 			delete arrPtr;
@@ -76,7 +71,7 @@ Primitive::~Primitive(){
 }
 
 std::string Primitive::getStr(){
-	if (type == Type::STRING) return this->str;
+	if (type == Type::STRING) return *this->strPtr;
 	throw std::runtime_error("Not string data type");
 }
 
@@ -103,7 +98,7 @@ Array Primitive::getArr() {
 std::ostream& operator<< (std::ostream& os, const Primitive& primitive){
 	switch (primitive.type){
 		case Type::STRING:
-			os << '"' << primitive.str << '"';
+			os << '"' << *primitive.strPtr << '"';
 			break;
 		case Type::NUMBER:
 			os << primitive.num;
@@ -129,7 +124,7 @@ Object::Object(){
 Object::~Object() {
 	for (auto itr : *(this->map)) delete itr.second;
 	this->map->clear();
-	delete &map;
+	delete map;
 	map = nullptr;
 }
 
@@ -160,17 +155,17 @@ void Object::set(std::string key,bool value){
 	(*map)[key] = primitive;
 }
 
-void Object::set(std::string key, Object value){
+void Object::set(std::string key, Object& value){
 	Primitive* primitive = new Primitive(value);
 	(*map)[key] = primitive;
 }
 
-void Object::set(std::string key, Array value){
+void Object::set(std::string key, Array& value){
 	Primitive* primitive = new Primitive(value);
 	(*map)[key] = primitive;
 }
 
-Object Object::parse(const std::string& str){
+Object& Object::parse(const std::string& str){
 	int startValue = 0;
 	return Parse::getObject(startValue, str);
 }
@@ -198,9 +193,8 @@ std::string Parse::getKey(int& startIndex, const std::string& str){
 			returnValue.erase(returnValue.find_last_not_of(" ")+1);
 			// if there is quote at 2 ends, remove it
 			if (returnValue[0] == '"') returnValue.erase(0,1);
-			if (returnValue[returnValue.length() -1] == '"') returnValue.erase(returnValue.length()-1);
+			if (returnValue[returnValue.length()-1] == '"') returnValue.erase(returnValue.length()-1);
 			// regex checking the syntax of the variable name
-			std::cout << returnValue << std::endl;
 			std::regex pattern("^[a-zA-Z_][a-zA-Z0-9_]*$");
 			if (!std::regex_search(returnValue, pattern)) throw std::runtime_error("variable name is invalid at " + std::to_string(startIndex));
 			startIndex = endIndex;
@@ -267,6 +261,9 @@ bool Parse::getBoolean(int& startIndex, const std::string& str){
 }
 
 /**
+LESSON:
+1. to return-by-reference, the return variable MUST BE A POINTER because using a regular variable to store dereference of the return variable create a false pointer which will be delete after the function is completed
+2. the capture variable of return-by-reference also MUST BE A POINTER because the above reason also
 process character by character.
 this ensure that this algorithm is running in O(n)
 to run this funciton, it must start with '{', hence the first character is skip.
@@ -292,36 +289,39 @@ the case where there is no key, (, :"value"), Parse::getKey(int& startIndex, con
 the case where
 any other character will throw an error, 2 colon ("key"::"value")
 */
-Object Parse::getObject(int& startIndex, const std::string& str){
+Object& Parse::getObject(int& startIndex, const std::string& str){
 	int endIndex = startIndex+1;
 	std::string key = getKey(endIndex, str); // the start of an Object should be a key.
 	endIndex++; // after above funciton, it stops at ':'
-	Object obj = *(new Object()); // dynamically allocate object
+	Object* obj = new Object(); // dynamically allocate object
 	for (; endIndex < str.length(); endIndex++) { // now the string should start at ':'
 		switch(str[endIndex]) {
 			case '{': // start of a Object value
 				if (key.empty()) throw std::runtime_error("Missing key at: " + std::to_string(endIndex));
-				obj.set(key, Parse::getObject(endIndex, str));
+				obj->set(key, Parse::getObject(endIndex, str));
 				key = "";
 				break;
 			case '}': // terminate character of this function
-				if (key.empty()) return obj;
+				if (key.empty()) {
+
+					return *obj;
+				}
 				throw std::runtime_error("Missing value at: " + std::to_string(endIndex));
 				break;
 			case '[': // start of Array
 				if (key.empty()) throw std::runtime_error("Incorrect tokken at: " + std::to_string(endIndex));
-				obj.set(key, Parse::getArray(endIndex, str));
+				obj->set(key, Parse::getArray(endIndex, str));
 				key = "";
 				break;
 			case 't': // possible start of bolean true value
 			case 'f': // possible start of bolean false value
 				if (key.empty()) throw std::runtime_error("Incorrect tokken at: " + std::to_string(endIndex));
-				obj.set(key, getBoolean(endIndex, str));
+				obj->set(key, getBoolean(endIndex, str));
 				key = "";
 				break;
 			case '"': // possible start of of string value
 				if (key.empty()) throw std::runtime_error("Incorrect tokken at: " + std::to_string(endIndex));
-				obj.set(key, getString(endIndex,str));
+				obj->set(key, getString(endIndex,str));
 				key = "";
 				break;
 			case ',': // separator between each key:value pair
@@ -342,7 +342,7 @@ Object Parse::getObject(int& startIndex, const std::string& str){
 			case '8':
 			case '9':
 				if (key.empty()) throw std::runtime_error("Incorrect tokken at: " + std::to_string(endIndex));
-				obj.set(key, Parse::getNumber(endIndex, str));
+				obj->set(key, Parse::getNumber(endIndex, str));
 				key = "";
 				break;
 			default: // character is invalid
@@ -365,37 +365,37 @@ when '[' parse Array
 when ']' it is the terminate of this function and
 when ',' isFoundValue set to false. if isFoundValue = false, then two commas are consecutive
 */
-Array Parse::getArray(int& startIndex, const std::string& str){
+Array& Parse::getArray(int& startIndex, const std::string& str){
 	bool isFoundValue = 0; // checking if a value is found
-	Array arr = *(new Array());
+	Array* arr = new Array();
 	for (int endIndex = startIndex+1; endIndex < str.length(); endIndex++){ // advance the character by 1 since to enter this stage, it start with '['
 		switch(str[endIndex]){
 			case '[': // case of a nested array
 				if (isFoundValue) throw std::runtime_error("Missing separate character at " + std::to_string(endIndex)); // found 2 consecutive values without a separate character
-				arr.insert(Parse::getArray(endIndex,str));
+				arr->insert(Parse::getArray(endIndex,str));
 				isFoundValue = 1; // value is found
 				break;
 			case ']': // end of this array
 				if (isFoundValue) {
 					startIndex = endIndex;
-					return arr; // teminate charcater should be meet before a value
+					return *arr;
 				}
 				else throw std::runtime_error("Missing value before terminate character at " + std::to_string(endIndex));
 				break;
 			case '{': // case of an object
 				if (isFoundValue) throw std::runtime_error("Missing separate character at " + std::to_string(endIndex)); // found 2 consecutive values without a separate character
-				arr.insert(Parse::getArray(endIndex, str));
+				arr->insert(Parse::getObject(endIndex, str));
 				isFoundValue = 1;
 				break;
 			case '"': // start of a string
 				if (isFoundValue) throw std::runtime_error("Missing separate character at " + std::to_string(endIndex)); // found 2 consecutive values without a separate character
-				arr.insert(Parse::getString(endIndex, str));
+				arr->insert(Parse::getString(endIndex, str));
 				isFoundValue = 1; // value is found
 				break;
 			case 't': // case that it is a boolean
 			case 'f':
 				if (isFoundValue) throw std::runtime_error("Missing separate character at " + std::to_string(endIndex)); // found 2 consecutive values without a separate character
-				arr.insert(Parse::getBoolean(endIndex, str));
+				arr->insert(Parse::getBoolean(endIndex, str));
 				isFoundValue = 1; // value is found
 				break;
 			case '0': // case that it is a number
@@ -409,7 +409,7 @@ Array Parse::getArray(int& startIndex, const std::string& str){
 			case '8':
 			case '9':
 				if (isFoundValue) throw std::runtime_error("Missing separate character at " + std::to_string(endIndex)); // found 2 consecutive values without a separate character
-				arr.insert(Parse::getNumber(endIndex, str));
+				arr->insert(Parse::getNumber(endIndex, str));
 				isFoundValue = 1; // value is found
 				break;
 			case ' ': // ignore space character
@@ -455,9 +455,18 @@ void Array::insert(Array arr){
 }
 
 
-Array Array::parse(const std::string& str){
+Array& Array::parse(const std::string& str){
 	int startIndex = 0;
 	return Parse::getArray(startIndex, str);
+}
+
+std::ostream& operator<< (std::ostream& os, const Array& arr){
+	os << "[\n";
+	for (auto ele : *arr.vec){
+		os <<*ele<<"\n";
+	}
+	os << "]";
+	return os;
 }
 
 Array::~Array(){
