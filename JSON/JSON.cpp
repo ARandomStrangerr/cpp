@@ -419,7 +419,6 @@ Array Parse::getArray(int& startIndex, const std::string& str){
 				else throw std::runtime_error("No value is found before a comma" + std::to_string(endIndex));
 				break;
 			default: // any other character is an error
-				std::cout << str[endIndex] << std::endl;
 				throw std::runtime_error("unknwon tokken " + std::to_string(endIndex));
 		}
 	}
