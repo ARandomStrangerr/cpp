@@ -123,44 +123,51 @@ std::ostream& operator<< (std::ostream& os, const Primitive& primitive){
 }
 
 Object::Object(){
-	map = *(new std::unordered_map<std::string, Primitive*>());
+	map = new std::unordered_map<std::string, Primitive*>();
+}
+
+Object::~Object() {
+	for (auto itr : *(this->map)) delete itr.second;
+	this->map->clear();
+	delete &map;
+	map = nullptr;
 }
 
 Primitive Object::get(std::string key){
-	if (map.find(key) != map.end()) return *map[key];
+	if (map->find(key) != map->end()) return (*map)[key];
 	throw std::runtime_error("the key does not exists");
 }
 
 void Object::remove(std::string key){
-	if (map.find(key) != map.end()){
-		delete map[key];
-		map.erase(key);
+	if (map->find(key) != map->end()){
+		delete (*map)[key];
+		map->erase(key);
 	}
 }
 
 void Object::set(std::string key,std::string value){
 	Primitive* primitive = new Primitive(value);
-	map[key] = primitive;
+	(*map)[key] = primitive;
 }
 
 void Object::set(std::string key,double value){
 	Primitive* primitive = new Primitive(value);
-	map[key] = primitive;
+	(*map)[key] = primitive;
 }
 
 void Object::set(std::string key,bool value){
 	Primitive* primitive = new Primitive(value);
-	map[key] = primitive;
+	(*map)[key] = primitive;
 }
 
 void Object::set(std::string key, Object value){
 	Primitive* primitive = new Primitive(value);
-	map[key] = primitive;
+	(*map)[key] = primitive;
 }
 
 void Object::set(std::string key, Array value){
 	Primitive* primitive = new Primitive(value);
-	map[key] = primitive;
+	(*map)[key] = primitive;
 }
 
 Object Object::parse(const std::string& str){
@@ -170,7 +177,7 @@ Object Object::parse(const std::string& str){
 
 std::ostream& operator<< (std::ostream& os, const Object& obj){
 	os << "{\n";
-	for (const auto& itr : obj.map){
+	for (const auto& itr : *(obj.map)){
 		os << '"' << itr.first << '"' << ":" << *(itr.second)<< "\n";
 	}
 	os << "}" << std::endl;
@@ -410,7 +417,9 @@ Array Parse::getArray(int& startIndex, const std::string& str){
 			case ',': // case of separate character
 				if (isFoundValue) isFoundValue = 0; // case that the value
 				else throw std::runtime_error("No value is found before a comma" + std::to_string(endIndex));
+				break;
 			default: // any other character is an error
+				std::cout << str[endIndex] << std::endl;
 				throw std::runtime_error("unknwon tokken " + std::to_string(endIndex));
 		}
 	}
