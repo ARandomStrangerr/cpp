@@ -1,5 +1,4 @@
-#include "Socket.h"
-#include "Json.h"
+#include "HttpSession.h"
 #include <thread>
 #include <iostream>
 
@@ -37,7 +36,12 @@ void testParseJsonObject(){
 	cout<<obj<<endl;
 }
 
+void testHttpSession(){
+	HttpSession session (9999, 2);
+	session.start();
+}
+
 int main() {
-	testParseJsonObject();
+	testHttpSession();
 	return 0;
 }

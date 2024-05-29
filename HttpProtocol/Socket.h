@@ -16,7 +16,7 @@ class Listener {
 		// constructors
 		Listener(int, int); // open a listener at the given port with specified queue length
 		// destructor
-		~Listener();
+		//~Listener();
 		// functions
 		Socket& accept();
 };
@@ -41,7 +41,7 @@ class Socket {
 		Socket(std::string, int); // create a new socket from ipv4 and port
 
 		// destructor
-		~Socket();
+		//~Socket();
 
 		/**
 		 * write a line into output buffer then flush it. new-line character will be appened at the end
