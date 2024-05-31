@@ -30,14 +30,18 @@ void HttpSession::start(){
 }
 
 void HttpSession::httpHandler(Socket soc){
-	// read the first line, which is route
+	// read the content of the html
 	std::string firstLine = soc.readLine();
 	std::vector<std::string> tokens = split(firstLine, '\n');
 	JsonObject jsonObj;
+	// parse the method and route
+	std::vector<std::string> splitTokken = split(tokens[0], ' ');
+	jsonObj.add("method", splitTokken[0]);
+	jsonObj.add("route", splitTokken[1]);
+	// parse the rest of the header
 	for (int i = 1; i < tokens.size(); i++) {
-		std::vector<std::string> splitTokken = split(tokens[i], ':');
+		splitTokken = split(tokens[i], ':');
 		jsonObj.add(trim(splitTokken[0]), trim(splitTokken[1]));
-//		std::cout << splitTokken[0] << " || " << splitTokken[1] << std::endl;
 	}
 	std::cout << jsonObj << std::endl;
 }
