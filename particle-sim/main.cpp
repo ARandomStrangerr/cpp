@@ -7,11 +7,7 @@
 #include "SFML/System/Time.hpp"
 #include "SFML/System/Vector2.hpp"
 #include <SFML/Graphics.hpp>
-#include <cstdlib>
-#include <iostream>
-#include <thread>
-#include <chrono>
-using namespace std;
+
 class Obj{
 	private:
 		sf::CircleShape shape;
