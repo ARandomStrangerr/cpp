@@ -35,8 +35,8 @@ class Obj{
 			sf::Vector2f displacement = centerThisShape - centerBoundary;
 			float distance = sqrt(pow(displacement.x, 2) + pow(displacement.y, 2));
 			if (distance + shape.getRadius() >= boundary.getRadius()) {
-				sf::Vector2f correctPosition = centerBoundary + (displacement / distance) * (boundary.getRadius() - shape.getRadius()) - sf::Vector2f(shape.getRadius(), shape.getRadius());
-				shape.setPosition(correctPosition);
+				curPos = centerBoundary + (displacement / distance) * (boundary.getRadius() - shape.getRadius()) - sf::Vector2f(shape.getRadius(), shape.getRadius());
+				shape.setPosition(curPos);
 			}
 		}
 
@@ -50,7 +50,7 @@ class Obj{
 };
 
 int main() {
-	Obj shape1(300, 300, 30, sf::Color::Cyan, 0.05, 0);
+	Obj shape1(400, 300, 30, sf::Color::Cyan, 0.00, 0);
 	sf::Vector2f gravity(0, 1);
 	float dt = 0.0001;
 	
