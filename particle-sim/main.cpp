@@ -40,6 +40,22 @@ class Obj{
 			}
 		}
 
+		void detectCollision(Obj& other){
+			sf::Vector2f centerThisShape = shape.getPosition()+sf::Vector2f(shape.getRadius(), shape.getRadius());
+			sf::Vector2f centerOtherShape = other.shape.getPosition()+sf::Vector2f(other.shape.getRadius(), other.shape.getRadius());
+			sf::Vector2f displacement = centerOtherShape - centerThisShape;
+			float distance = sqrt(pow(displacement.x,2) + pow (displacement.y,2));
+			// if 2 shapes overlap eachother, we move each shape half the overlap distance
+			if (distance < shape.getRadius() + other.shape.getRadius()) {
+				float overlap = shape.getRadius() + other.shape.getRadius() - distance;
+				sf::Vector2f correction = (displacement / distance) * overlap * 0.5f;
+				prevPos = curPos;
+				curPos = shape.getPosition() - correction;
+				other.prevPos = other.curPos;
+				other.curPos = other.shape.getPosition() + correction;
+			}
+		}
+
 		void accelerate(sf::Vector2f vec) {
 			a += vec;
 		}
@@ -50,11 +66,12 @@ class Obj{
 };
 
 int main() {
-	Obj shape1(400, 300, 30, sf::Color::Cyan, 0.00, 0);
+	Obj shape1(400, 300, 30, sf::Color::Cyan, 0, 0);
+	Obj shape2(200,300, 30, sf::Color::Yellow, 0, 0);
 	sf::Vector2f gravity(0, 1);
 	float dt = 0.0001;
 	
-	sf::CircleShape container(300);	
+	sf::CircleShape container(300);
 
 	sf::RenderWindow window(sf::VideoMode(800, 600), "SFML window");
 
@@ -66,11 +83,18 @@ int main() {
 
 		shape1.accelerate(gravity);
 		shape1.updatePos(dt);
-		shape1.correctPos(container);
+		shape1.stayInBoundary(container);
+		shape1.detectCollision(shape2);
+
+		shape2.accelerate(gravity);
+		shape2.updatePos(dt);
+		shape2.stayInBoundary(container);
+		shape2.detectCollision(shape1);
 
 		window.clear();
 		window.draw(container);
 		window.draw(shape1.getShape());
+		window.draw(shape2.getShape());
 		window.display();
 	}
     return 0;
