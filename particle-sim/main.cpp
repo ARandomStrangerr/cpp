@@ -26,7 +26,7 @@ class Obj{
 			shape.setPosition(curPos);
 		}
 
-		void correctPos(sf::CircleShape boundary){
+		void stayInBoundary(sf::CircleShape& boundary){
 			// obtain the position vector center of the boundary
 			sf::Vector2f centerBoundary = boundary.getPosition() + sf::Vector2f(boundary.getRadius(), boundary.getRadius());
 			// obtain the position vecotr center of this shape
