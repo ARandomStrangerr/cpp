@@ -7,6 +7,8 @@
 #include "SFML/System/Time.hpp"
 #include "SFML/System/Vector2.hpp"
 #include <SFML/Graphics.hpp>
+#include <chrono>
+#include <thread>
 
 class Obj{
 	private:
@@ -49,10 +51,10 @@ class Obj{
 			if (distance < shape.getRadius() + other.shape.getRadius()) {
 				float overlap = shape.getRadius() + other.shape.getRadius() - distance;
 				sf::Vector2f correction = (displacement / distance) * overlap * 0.5f;
-				prevPos = curPos;
-				curPos = shape.getPosition() - correction;
-				other.prevPos = other.curPos;
-				other.curPos = other.shape.getPosition() + correction;
+				curPos -= correction;
+				shape.move(-correction);
+				other.curPos += correction;
+				other.shape.move(correction);
 			}
 		}
 
@@ -66,7 +68,7 @@ class Obj{
 };
 
 int main() {
-	Obj shape1(400, 300, 30, sf::Color::Cyan, 0, 0);
+	Obj shape1(400, 300, 30, sf::Color::Cyan, 0, 1);
 	Obj shape2(200,300, 30, sf::Color::Yellow, 0, 0);
 	sf::Vector2f gravity(0, 1);
 	float dt = 0.0001;
