@@ -68,10 +68,10 @@ class Obj{
 };
 
 int main() {
-	Obj shape1(400, 300, 30, sf::Color::Cyan, 0, 1);
+	Obj shape1(400, 300, 30, sf::Color::Cyan, 0, 100);
 	Obj shape2(200,300, 30, sf::Color::Yellow, 0, 0);
-	sf::Vector2f gravity(0, 1);
-	float dt = 0.0001;
+	sf::Vector2f gravity(0, 9.81);
+	float dt = 0.09;
 	
 	sf::CircleShape container(300);
 
@@ -98,6 +98,8 @@ int main() {
 		window.draw(shape1.getShape());
 		window.draw(shape2.getShape());
 		window.display();
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(16));
 	}
     return 0;
 }
