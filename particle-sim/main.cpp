@@ -9,6 +9,9 @@
 #include <SFML/Graphics.hpp>
 #include <chrono>
 #include <thread>
+#include <vector>
+#include <iostream>
+#include <mutex>
 
 class Obj{
 	private:
@@ -67,40 +70,63 @@ class Obj{
 		}
 };
 
+std::mutex objVecMutex;
+
+void addObjectThread(std::vector<Obj>& objVec){
+	int totalObject = 10;
+	float r = 5,
+				yIncrement = 0.1,
+				yInitial = 0.5;
+	int colors [15] {205,180,219,255,255,221,255, 175, 204,189, 224, 254,162, 210, 255};
+	for (int i=0; i < totalObject; i++){
+		objVecMutex.lock();	
+		objVec.push_back(Obj (300,300,r, sf::Color(colors[i%5*3], colors[i%5*3+1], colors[i%5*3+2]), 1,1));
+		objVecMutex.unlock();
+		r+=5;
+		if (r == 20) r = 10;
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+	}
+}
+
 int main() {
-	Obj shape1(400, 300, 30, sf::Color::Cyan, 0, 100);
-	Obj shape2(200,300, 30, sf::Color::Yellow, 0, 0);
+	std::vector<Obj> objVec;
+
 	sf::Vector2f gravity(0, 9.81);
 	float dt = 0.09;
 	
 	sf::CircleShape container(300);
 
-	sf::RenderWindow window(sf::VideoMode(800, 600), "SFML window");
-
+	sf::RenderWindow window(sf::VideoMode(800, 600), "SFML window");	
+	
+	std::thread thread(addObjectThread, std::ref(objVec));
+	
 	while (window.isOpen()) {
 		sf::Event event;
 		while (window.pollEvent(event)) {
 			if (event.type == sf::Event::Closed) window.close();
 		}
 
-		shape1.accelerate(gravity);
-		shape1.updatePos(dt);
-		shape1.stayInBoundary(container);
-		shape1.detectCollision(shape2);
-
-		shape2.accelerate(gravity);
-		shape2.updatePos(dt);
-		shape2.stayInBoundary(container);
-		shape2.detectCollision(shape1);
-
 		window.clear();
-		window.draw(container);
-		window.draw(shape1.getShape());
-		window.draw(shape2.getShape());
+
+		window.draw(container);	
+		
+		objVecMutex.lock();
+		for (int i = 0; i < objVec.size(); i++){
+			objVec[i].accelerate(gravity);
+			objVec[i].updatePos(dt);
+			objVec[i].stayInBoundary(container);
+			for(int j = 0; j < objVec.size(); j++)
+				if (i!=j)
+					objVec[i].detectCollision(objVec[j]);
+			window.draw(objVec[i].getShape());
+		}
+		objVecMutex.unlock();
+
 		window.display();
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(16));
 	}
-    return 0;
+	thread.join();
+	return 0;
 }
 
