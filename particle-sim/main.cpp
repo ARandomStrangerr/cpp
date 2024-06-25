@@ -24,7 +24,6 @@ class Obj{
 		}
 
 		void updatePos(float dt){
-			//std::cout << shape.getPosition().x << " , " << shape.getPosition().y << std::endl;
 			sf::Vector2f v = curPos - prevPos;
 			prevPos = curPos;
 			curPos = curPos + v + a * dt * dt;
@@ -55,9 +54,9 @@ class Obj{
 				float overlap = shape.getRadius() + other.shape.getRadius() - distance;
 				sf::Vector2f correction = (displacement / distance) * overlap * 0.5f;
 				curPos -= correction;
-				shape.move(-correction);
+				shape.setPosition(curPos);
 				other.curPos += correction;
-				other.shape.move(correction);
+				other.shape.setPosition(other.curPos);
 			}
 		}
 
@@ -75,13 +74,15 @@ std::mutex objVecMutex;
 void addObjectThread(std::vector<Obj>& objVec){
 	int totalObject = 10;
 	float r = 5,
-				yIncrement = 0.1,
-				yInitial = 0.5;
-	int colors [15] {205,180,219,255,255,221,255, 175, 204,189, 224, 254,162, 210, 255};
+				xIncrement = 0.1,
+				x = 0.5;
+	int colors [15] {205,180,219,255,200,221,255, 175, 204,189, 224, 254,162, 210, 255};
 	for (int i=0; i < totalObject; i++){
 		objVecMutex.lock();	
-		objVec.push_back(Obj (300,300,r, sf::Color(colors[i%5*3], colors[i%5*3+1], colors[i%5*3+2]), 1,1));
+		objVec.push_back(Obj (500,300,r, sf::Color(colors[i%5*3], colors[i%5*3+1], colors[i%5*3+2]), 0, 0));
 		objVecMutex.unlock();
+		x+=xIncrement;
+		if (x > 1.5) xIncrement = -0.1;
 		r+=5;
 		if (r == 20) r = 10;
 		std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -92,7 +93,7 @@ int main() {
 	std::vector<Obj> objVec;
 
 	sf::Vector2f gravity(0, 9.81);
-	float dt = 0.09;
+	float dt = 0.01;
 	
 	sf::CircleShape container(300);
 
@@ -111,15 +112,15 @@ int main() {
 		window.draw(container);	
 		
 		objVecMutex.lock();
-		for (int i = 0; i < objVec.size(); i++){
-			objVec[i].accelerate(gravity);
-			objVec[i].updatePos(dt);
-			objVec[i].stayInBoundary(container);
-			for(int j = 0; j < objVec.size(); j++)
-				if (i!=j)
-					objVec[i].detectCollision(objVec[j]);
-			window.draw(objVec[i].getShape());
+		for (int i = 0; i < objVec.size(); i++) objVec[i].accelerate(gravity);
+		for (int k = 5; k--;){
+			for (int i = 0; i < objVec.size(); i++) objVec[i].updatePos(dt);
+			for (int i = 0; i < objVec.size(); i++) objVec[i].stayInBoundary(container);
+			for (int i = 0; i < objVec.size(); i++) 
+				for (int j= i + 1; j < objVec.size(); j++) 
+					objVec[i].detectCollision(objVec[j]);	
 		}
+		for (int i=0; i<objVec.size();i++) window.draw(objVec[i].getShape());
 		objVecMutex.unlock();
 
 		window.display();
