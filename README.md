@@ -2,7 +2,7 @@ the code for linear algebra based on Dr.John Stockie's lectures
 http://www.sfu.ca/~jstockie/
 
 it is fun to do this, if you tell me to make a website, yeh, i know how to do it, but i would rather shoot myself in the foot.
-# Linear Algebra Class
+# Linear Algebra
 A class perform basic linear algebra. I will insert animation later on so that it is easier to visual. it is quite easy to just understand the number aspect of linear algebra. the hard point is that it is hard to understand the geometric.  
 
 `Matrix<T>(unsigned int, unsigned int)` default constructor, declare a matrix with designated size, with all 0 inside  
@@ -33,3 +33,8 @@ an inllustration for LU decomposition:
 ![](https://github.com/ARandomStrangerr/cpp/blob/main/linear/LU%20illustration.gif)
   
 all the illustrations is scripted on [Google Colab-notebook](https://colab.research.google.com/drive/1w-wrmK5GKy6GDv7AoIVimvzwBzArBPJw?usp=sharing)
+
+# Particle Simulation
+An implementation of Verlet Integration
+Gen 1: down to 20 FPS with roughly 300 Objs
+![](https://github.com/ARandomStrangerr/cpp/blob/main/particle-sim/gen1%20demonstration.gif)
