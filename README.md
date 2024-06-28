@@ -38,3 +38,9 @@ all the illustrations is scripted on [Google Colab-notebook](https://colab.resea
 An implementation of Verlet Integration
 Gen 1: down to 20 FPS with roughly 300 Objs
 ![](https://github.com/ARandomStrangerr/cpp/blob/main/particle-sim/gen1%20demonstration.gif)
+Discovery:
+
+dt and frame per secon must be matching each other because the number of frame/sec is the number of calculation cycle each second.
+
+if dt > fps, we can understand that we dissected each interval bigger than the fps. Each interval of calculation, the position will ended up further; hence, object tends to fail around.
+if dt < fps, the opposite happens.
