@@ -1,12 +1,4 @@
-#include "SFML/Graphics/CircleShape.hpp"
-#include "SFML/Graphics/Color.hpp"
-#include "SFML/Graphics/PrimitiveType.hpp"
-#include "SFML/Graphics/Shape.hpp"
-#include "SFML/Graphics/Vertex.hpp"
-#include "SFML/System/Clock.hpp"
-#include "SFML/System/Sleep.hpp"
-#include "SFML/System/Time.hpp"
-#include "SFML/System/Vector2.hpp"
+#include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
 #include <chrono>
 #include <string>
@@ -30,6 +22,7 @@ class Obj{
 			prevPos = curPos;
 			curPos = curPos + v + a * dt * dt;
 			shape.setPosition(curPos);
+			a = sf::Vector2f();
 		}
 
 		void stayInBoundary(sf::CircleShape& boundary){
@@ -73,8 +66,7 @@ class Obj{
 
 std::mutex objVecMutex;
 
-void addObjectThread(std::vector<Obj>& objVec){
-	int totalObject = 100;	
+void addObjectThread(std::vector<Obj>& objVec, int totalObject){
 	float r = 5,
 				xIncrement = 0.1,
 				x = 1,
@@ -100,7 +92,7 @@ int main() {
 	std::vector<Obj> objVec;
 
 	sf::Vector2f gravity(0, 9.81);
-	float dt = 0.005;
+	float dt = 0.40;
 	
 	sf::CircleShape container(300);
 
@@ -117,7 +109,7 @@ int main() {
 
 	sf::RenderWindow window(sf::VideoMode(600, 600), "SFML window");
 	
-	std::thread thread(addObjectThread, std::ref(objVec));
+	std::thread thread(addObjectThread, std::ref(objVec), 100);
 	
 	while (window.isOpen()) {
 		sf::Event event;
@@ -131,8 +123,8 @@ int main() {
 		
 		objVecMutex.lock();
 		for (int i = 0; i < objVec.size(); i++) objVec[i].accelerate(gravity);
+		for (int i = 0; i < objVec.size(); i++) objVec[i].updatePos(dt);
 		for (int k = 9; k--;){
-			for (int i = 0; i < objVec.size(); i++) objVec[i].updatePos(dt);
 			for (int i = 0; i < objVec.size(); i++) objVec[i].stayInBoundary(container);
 			for (int i = 0; i < objVec.size(); i++) 
 				for (int j= i + 1; j < objVec.size(); j++) 
