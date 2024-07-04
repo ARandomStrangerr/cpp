@@ -1,68 +1,10 @@
-#include <SFML/System.hpp>
-#include <SFML/Graphics.hpp>
+#include "particle.h"
 #include <chrono>
 #include <string>
 #include <thread>
 #include <vector>
 #include <iostream>
 #include <mutex>
-
-class Obj{
-	private:
-		sf::CircleShape shape;
-		sf::Vector2f a, prevPos, curPos;
-	public:
-		Obj (float x, float y, float r, sf::Color color, float initX, float initY) : shape(r), prevPos(x,y), curPos(x+initX,y+initY){
-			shape.setPosition(prevPos);
-			shape.setFillColor(color);
-		}
-
-		void updatePos(float dt){
-			sf::Vector2f v = curPos - prevPos;
-			prevPos = curPos;
-			curPos = curPos + v + a * dt * dt;
-			shape.setPosition(curPos);
-			a = sf::Vector2f();
-		}
-
-		void stayInBoundary(sf::CircleShape& boundary){
-			// obtain the position vector center of the boundary
-			sf::Vector2f centerBoundary = boundary.getPosition() + sf::Vector2f(boundary.getRadius(), boundary.getRadius());
-			// obtain the position vecotr center of this shape
-			sf::Vector2f centerThisShape = shape.getPosition() + sf::Vector2f(shape.getRadius(), shape.getRadius());
-			// if the displacement is greater than the radius, then it is outside of the circle
-			sf::Vector2f displacement = centerThisShape - centerBoundary;
-			float distance = sqrt(pow(displacement.x, 2) + pow(displacement.y, 2));
-			if (distance + shape.getRadius() >= boundary.getRadius()) {
-				curPos = centerBoundary + (displacement / distance) * (boundary.getRadius() - shape.getRadius()) - sf::Vector2f(shape.getRadius(), shape.getRadius());
-				shape.setPosition(curPos);
-			}
-		}
-
-		void detectCollision(Obj& other){
-			sf::Vector2f centerThisShape = shape.getPosition()+sf::Vector2f(shape.getRadius(), shape.getRadius());
-			sf::Vector2f centerOtherShape = other.shape.getPosition()+sf::Vector2f(other.shape.getRadius(), other.shape.getRadius());
-			sf::Vector2f displacement = centerOtherShape - centerThisShape;
-			float distance = sqrt(pow(displacement.x,2) + pow (displacement.y,2));
-			// if 2 shapes overlap eachother, we move each shape half the overlap distance
-			if (distance < shape.getRadius() + other.shape.getRadius()) {
-				float overlap = shape.getRadius() + other.shape.getRadius() - distance;
-				sf::Vector2f correction = (displacement / distance) * overlap * 0.5f;
-				curPos -= correction;
-				shape.setPosition(curPos);
-				other.curPos += correction;
-				other.shape.setPosition(other.curPos);
-			}
-		}
-
-		void accelerate(sf::Vector2f vec) {
-			a += vec;
-		}
-
-		const sf::CircleShape getShape() const {
-			return shape;
-		}
-};
 
 std::mutex objVecMutex;
 
@@ -92,7 +34,7 @@ int main() {
 	std::vector<Obj> objVec;
 
 	sf::Vector2f gravity(0, 9.81);
-	float dt = 0.40;
+	float dt = 0.1;
 	
 	sf::CircleShape container(300);
 
@@ -104,8 +46,7 @@ int main() {
 	fpsText.setFillColor(sf::Color(208, 244, 222));
 	fpsText.setPosition(0,0);
 	sf::Clock clock;
-	float fps = 0;
-
+	float fps = 60;
 
 	sf::RenderWindow window(sf::VideoMode(600, 600), "SFML window");
 	
@@ -122,13 +63,13 @@ int main() {
 		window.draw(container);	
 		
 		objVecMutex.lock();
-		for (int i = 0; i < objVec.size(); i++) objVec[i].accelerate(gravity);
-		for (int i = 0; i < objVec.size(); i++) objVec[i].updatePos(dt);
+		for (int i = 0; i < objVec.size(); i++) objVec[i].applyAcceleration(gravity);
+		for (int i = 0; i < objVec.size(); i++) objVec[i].updatePos(1.f/fps);
 		for (int k = 9; k--;){
-			for (int i = 0; i < objVec.size(); i++) objVec[i].stayInBoundary(container);
+			for (int i = 0; i < objVec.size(); i++) objVec[i].applyBoundary(container);
 			for (int i = 0; i < objVec.size(); i++) 
 				for (int j= i + 1; j < objVec.size(); j++) 
-					objVec[i].detectCollision(objVec[j]);	
+					objVec[i].applyCollision(objVec[j]);
 		}
 		for (int i=0; i<objVec.size();i++) window.draw(objVec[i].getShape());
 		objVecMutex.unlock();
